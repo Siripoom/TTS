@@ -1,0 +1,227 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ตารางผู้ใช้ (Users)
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String   @unique
+  password  String
+  role      Role  @default(customer)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Vehicle Vehicle[]
+
+  TruckQueue TruckQueue[]
+
+  DriverPayment DriverPayment[]
+
+  AdvancePayment AdvancePayment[]
+
+  TrafficFine TrafficFine[]
+}
+
+
+enum Role {
+  admin
+  driver
+  accountant
+  customer
+}
+
+// ตารางลูกค้า (Customers)
+model Customer {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  contactInfo String?
+  address     String?
+  pricePerTrip Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  TruckQueue TruckQueue[]
+
+  Invoice Invoice[]
+}
+
+// ตารางซัพพลายเออร์ (Suppliers)
+model Supplier {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  contactInfo String?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  TruckQueue TruckQueue[]
+}
+
+// ตารางรถและพนักงานขับรถ (Vehicles & Drivers)
+model Vehicle {
+  id        String   @id @default(uuid()) @db.Uuid
+  plateNumber String @unique
+  model     String?
+  capacity  Float?
+  driverId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  driver    User? @relation(fields: [driverId], references: [id])
+
+  TruckQueue TruckQueue[]
+
+  FuelCost FuelCost[]
+
+  MaintenanceCost MaintenanceCost[]
+}
+
+// ตารางคิวการบรรทุก (Truck_Queues)
+model TruckQueue {
+  id            String   @id @default(uuid()) @db.Uuid
+  customerId    String
+  vehicleId     String?
+  driverId      String?
+  supplierId    String
+  status        QueueStatus @default(pending)
+  distanceKm    Float?
+  tripType      TripType @default(full_delivery)
+  overnight     Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  customer      Customer @relation(fields: [customerId], references: [id])
+  vehicle       Vehicle? @relation(fields: [vehicleId], references: [id])
+  driver        User? @relation(fields: [driverId], references: [id])
+  supplier      Supplier @relation(fields: [supplierId], references: [id])
+
+  DriverPayment DriverPayment[]
+
+  InvoiceItem InvoiceItem[]
+}
+
+// ตารางต้นทุนเชื้อเพลิง (Fuel_Costs)
+model FuelCost {
+  id          String   @id @default(uuid()) @db.Uuid
+  vehicleId   String
+  fuelStation FuelStation
+  cost        Float
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  
+  vehicle     Vehicle @relation(fields: [vehicleId], references: [id])
+}
+
+enum FuelStation {
+  station_1
+  station_2
+}
+
+// ตารางค่าใช้จ่ายซ่อมบำรุงรถ (Maintenance_Costs)
+model MaintenanceCost {
+  id          String   @id @default(uuid()) @db.Uuid
+  vehicleId   String
+  description String
+  cost        Float
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  
+  vehicle     Vehicle @relation(fields: [vehicleId], references: [id])
+}
+
+// ตารางค่าขนส่งและค่าจ้างคนขับ (Driver_Payments)
+model DriverPayment {
+  id              String   @id @default(uuid()) @db.Uuid
+  driverId        String
+  queueId         String
+  baseFare        Float
+  overnightBonus  Float @default(0)
+  deductions      Float @default(0)
+  finalPayment    Float
+  createdAt       DateTime @default(now())
+
+  driver          User @relation(fields: [driverId], references: [id])
+  truckQueue      TruckQueue @relation(fields: [queueId], references: [id])
+}
+
+// ตารางการเบิกเงินล่วงหน้าของพนักงานขับรถ (Advance_Payments)
+model AdvancePayment {
+  id          String   @id @default(uuid()) @db.Uuid
+  driverId    String
+  amount      Float
+  status      AdvanceStatus @default(pending)
+  requestedAt DateTime @default(now())
+  approvedAt  DateTime?
+
+  driver      User @relation(fields: [driverId], references: [id])
+}
+
+enum AdvanceStatus {
+  pending
+  approved
+  rejected
+}
+
+// ตารางใบสั่งค่าปรับที่ต้องหักจากเงินเดือน (Traffic_Fines)
+model TrafficFine {
+  id                  String   @id @default(uuid()) @db.Uuid
+  driverId            String
+  amount              Float
+  issuedDate         DateTime @default(now())
+  paid                Boolean @default(false)
+  deductedFromSalary Boolean @default(false)
+  createdAt           DateTime @default(now())
+
+  driver              User @relation(fields: [driverId], references: [id])
+}
+
+// ตารางการวางบิล (Invoices)
+model Invoice {
+  id          String   @id @default(uuid()) @db.Uuid
+  customerId  String
+  totalAmount Float
+  dueDate     DateTime
+  status      InvoiceStatus @default(unpaid)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer    Customer @relation(fields: [customerId], references: [id])
+
+  InvoiceItem InvoiceItem[]
+}
+
+enum InvoiceStatus {
+  unpaid
+  paid
+  overdue
+}
+
+// ตารางรายละเอียดของใบวางบิล (Invoice_Items)
+model InvoiceItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  invoiceId   String
+  queueId     String
+  amount      Float
+
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  truckQueue  TruckQueue @relation(fields: [queueId], references: [id])
+}
+
+enum QueueStatus {
+  pending
+  in_progress
+  completed
+  canceled
+}
+
+enum TripType {
+  full_delivery
+  only_loading
+}
