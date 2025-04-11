@@ -14,7 +14,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      Role  @default(customer)
+  role      Role     @default(customer)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -29,7 +29,6 @@ model User {
   TrafficFine TrafficFine[]
 }
 
-
 enum Role {
   admin
   driver
@@ -39,13 +38,13 @@ enum Role {
 
 // ตารางลูกค้า (Customers)
 model Customer {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String
-  contactInfo String?
-  address     String?
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  contactInfo  String?
+  address      String?
   pricePerTrip Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   TruckQueue TruckQueue[]
 
@@ -66,15 +65,15 @@ model Supplier {
 
 // ตารางรถและพนักงานขับรถ (Vehicles & Drivers)
 model Vehicle {
-  id        String   @id @default(uuid()) @db.Uuid
-  plateNumber String @unique
-  model     String?
-  capacity  Float?
-  driverId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid()) @db.Uuid
+  plateNumber String   @unique
+  model       String?
+  capacity    Float?
+  driverId    String?  @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  driver    User? @relation(fields: [driverId], references: [id])
+  driver User? @relation(fields: [driverId], references: [id])
 
   TruckQueue TruckQueue[]
 
@@ -85,22 +84,22 @@ model Vehicle {
 
 // ตารางคิวการบรรทุก (Truck_Queues)
 model TruckQueue {
-  id            String   @id @default(uuid()) @db.Uuid
-  customerId    String
-  vehicleId     String?
-  driverId      String?
-  supplierId    String
-  status        QueueStatus @default(pending)
-  distanceKm    Float?
-  tripType      TripType @default(full_delivery)
-  overnight     Boolean @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id         String      @id @default(uuid()) @db.Uuid
+  customerId String      @db.Uuid
+  vehicleId  String?     @db.Uuid
+  driverId   String?     @db.Uuid
+  supplierId String      @db.Uuid
+  status     QueueStatus @default(pending)
+  distanceKm Float?
+  tripType   TripType    @default(full_delivery)
+  overnight  Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
-  customer      Customer @relation(fields: [customerId], references: [id])
-  vehicle       Vehicle? @relation(fields: [vehicleId], references: [id])
-  driver        User? @relation(fields: [driverId], references: [id])
-  supplier      Supplier @relation(fields: [supplierId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+  vehicle  Vehicle? @relation(fields: [vehicleId], references: [id])
+  driver   User?    @relation(fields: [driverId], references: [id])
+  supplier Supplier @relation(fields: [supplierId], references: [id])
 
   DriverPayment DriverPayment[]
 
@@ -109,14 +108,14 @@ model TruckQueue {
 
 // ตารางต้นทุนเชื้อเพลิง (Fuel_Costs)
 model FuelCost {
-  id          String   @id @default(uuid()) @db.Uuid
-  vehicleId   String
+  id          String      @id @default(uuid()) @db.Uuid
+  vehicleId   String      @db.Uuid
   fuelStation FuelStation
   cost        Float
-  date        DateTime @default(now())
-  createdAt   DateTime @default(now())
-  
-  vehicle     Vehicle @relation(fields: [vehicleId], references: [id])
+  date        DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
 }
 
 enum FuelStation {
@@ -126,41 +125,45 @@ enum FuelStation {
 
 // ตารางค่าใช้จ่ายซ่อมบำรุงรถ (Maintenance_Costs)
 model MaintenanceCost {
-  id          String   @id @default(uuid()) @db.Uuid
-  vehicleId   String
-  description String
-  cost        Float
-  date        DateTime @default(now())
-  createdAt   DateTime @default(now())
-  
-  vehicle     Vehicle @relation(fields: [vehicleId], references: [id])
+  id              String    @id @default(uuid()) @db.Uuid
+  vehicleId       String    @db.Uuid
+  maintenanceDate DateTime // วันที่ซ่อม (6/1/67, 12/3/67, ...)
+  itemName        String // รายการซ่อม เช่น "พัลมออย"
+  quantity        Int? // จำนวน 
+  cost            Float? // ค่าแรง/ค่าของ (ยังไม่มีในภาพ ต้องใส่ภายหลังได้)
+  greaseDate      DateTime? // วันที่อัดจารบี เช่น 1/4/67
+  mileage         String? // เลขไมล์ เช่น 24/10/67
+  remark          String? // หมายเหตุ
+  createdAt       DateTime  @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
 }
 
 // ตารางค่าขนส่งและค่าจ้างคนขับ (Driver_Payments)
 model DriverPayment {
-  id              String   @id @default(uuid()) @db.Uuid
-  driverId        String
-  queueId         String
-  baseFare        Float
-  overnightBonus  Float @default(0)
-  deductions      Float @default(0)
-  finalPayment    Float
-  createdAt       DateTime @default(now())
+  id             String   @id @default(uuid()) @db.Uuid
+  driverId       String   @db.Uuid
+  queueId        String   @db.Uuid
+  baseFare       Float
+  overnightBonus Float    @default(0)
+  deductions     Float    @default(0)
+  finalPayment   Float
+  createdAt      DateTime @default(now())
 
-  driver          User @relation(fields: [driverId], references: [id])
-  truckQueue      TruckQueue @relation(fields: [queueId], references: [id])
+  driver     User       @relation(fields: [driverId], references: [id])
+  truckQueue TruckQueue @relation(fields: [queueId], references: [id])
 }
 
 // ตารางการเบิกเงินล่วงหน้าของพนักงานขับรถ (Advance_Payments)
 model AdvancePayment {
-  id          String   @id @default(uuid()) @db.Uuid
-  driverId    String
+  id          String        @id @default(uuid()) @db.Uuid
+  driverId    String        @db.Uuid
   amount      Float
   status      AdvanceStatus @default(pending)
-  requestedAt DateTime @default(now())
+  requestedAt DateTime      @default(now())
   approvedAt  DateTime?
 
-  driver      User @relation(fields: [driverId], references: [id])
+  driver User @relation(fields: [driverId], references: [id])
 }
 
 enum AdvanceStatus {
@@ -171,30 +174,40 @@ enum AdvanceStatus {
 
 // ตารางใบสั่งค่าปรับที่ต้องหักจากเงินเดือน (Traffic_Fines)
 model TrafficFine {
-  id                  String   @id @default(uuid()) @db.Uuid
-  driverId            String
-  amount              Float
+  id                 String   @id @default(uuid()) @db.Uuid
+  driverId           String   @db.Uuid
+  amount             Float
   issuedDate         DateTime @default(now())
-  paid                Boolean @default(false)
-  deductedFromSalary Boolean @default(false)
-  createdAt           DateTime @default(now())
+  paid               Boolean  @default(false)
+  deductedFromSalary Boolean  @default(false)
+  createdAt          DateTime @default(now())
 
-  driver              User @relation(fields: [driverId], references: [id])
+  driver User @relation(fields: [driverId], references: [id])
 }
 
 // ตารางการวางบิล (Invoices)
 model Invoice {
-  id          String   @id @default(uuid()) @db.Uuid
-  customerId  String
+  id          String        @id @default(uuid()) @db.Uuid
+  customerId  String        @db.Uuid
   totalAmount Float
   dueDate     DateTime
   status      InvoiceStatus @default(unpaid)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  customer    Customer @relation(fields: [customerId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
 
   InvoiceItem InvoiceItem[]
+}
+
+model Product {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String // ชื่อสินค้า
+  category     String // ประเภทสินค้า
+  costPrice    Float // ราคาต้นทุน
+  sellingPrice Float // ราคาขาย
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 enum InvoiceStatus {
@@ -205,13 +218,13 @@ enum InvoiceStatus {
 
 // ตารางรายละเอียดของใบวางบิล (Invoice_Items)
 model InvoiceItem {
-  id          String   @id @default(uuid()) @db.Uuid
-  invoiceId   String
-  queueId     String
-  amount      Float
+  id        String @id @default(uuid()) @db.Uuid
+  invoiceId String @db.Uuid
+  queueId   String @db.Uuid
+  amount    Float
 
-  invoice     Invoice @relation(fields: [invoiceId], references: [id])
-  truckQueue  TruckQueue @relation(fields: [queueId], references: [id])
+  invoice    Invoice    @relation(fields: [invoiceId], references: [id])
+  truckQueue TruckQueue @relation(fields: [queueId], references: [id])
 }
 
 enum QueueStatus {
