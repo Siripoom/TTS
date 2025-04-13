@@ -5,6 +5,7 @@ import prisma from "./config/db.js"; // นำ Prisma Client มาใช้
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import customerRoutes from "./routes/customerRoute.js";
+import supplierRoutes from "./routes/supplierRoutes.js";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/suppliers", supplierRoutes);
 
 // ทดสอบ API Health Check
 app.get("/", async (req, res) => {
