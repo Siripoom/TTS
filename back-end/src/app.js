@@ -8,6 +8,13 @@ import customerRoutes from "./routes/customerRoute.js";
 import supplierRoutes from "./routes/supplierRoutes.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
 import truckQueueRoutes from "./routes/truckQueueRoutes.js";
+import maintenanceRoutes from "./routes/maintenanceRoutes.js";
+import fuelRoutes from "./routes/fuelRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
+import driverPaymentRoutes from "./routes/driverPaymentRoutes.js";
+import advanceAndFineRoutes from "./routes/advanceAndFineRoutes.js";
+import overnightBonusRoutes from "./routes/overnightBonusRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
 
 dotenv.config();
 
@@ -23,7 +30,13 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/truck-queues", truckQueueRoutes);
-
+app.use("/api/maintenances", maintenanceRoutes);
+app.use("/api/fuel", fuelRoutes);
+app.use("/api/invoices", invoiceRoutes);
+app.use("/api/driver-payments", driverPaymentRoutes);
+app.use("/api", advanceAndFineRoutes);
+app.use("/api", overnightBonusRoutes);
+app.use("/api/products", productRoutes);
 // ทดสอบ API Health Check
 app.get("/", async (req, res) => {
   try {
