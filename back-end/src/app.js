@@ -6,6 +6,8 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import customerRoutes from "./routes/customerRoute.js";
 import supplierRoutes from "./routes/supplierRoutes.js";
+import vehicleRoutes from "./routes/vehicleRoutes.js";
+import truckQueueRoutes from "./routes/truckQueueRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/suppliers", supplierRoutes);
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/truck-queues", truckQueueRoutes);
 
 // ทดสอบ API Health Check
 app.get("/", async (req, res) => {
