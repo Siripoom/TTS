@@ -1,161 +1,319 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
-  Layout,
   Card,
   Row,
   Col,
-  Button,
-  Select,
   Typography,
   Statistic,
-  Tooltip,
+  Button,
+  Space,
+  Dropdown,
+  Table,
+  Pagination,
 } from "antd";
-import { Line } from "@ant-design/charts";
+import {
+  BarChartOutlined,
+  CheckCircleOutlined,
+  FileTextOutlined,
+  DownOutlined,
+} from "@ant-design/icons";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
+
 import "./Dashboard.css";
-import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  RocketOutlined,
-  EnvironmentOutlined,
-} from "@ant-design/icons";
+import PropTypes from "prop-types";
 
-// Register the components to make the Bar chart work
-
-const { Sider, Content } = Layout;
-const { Option } = Select;
 const { Title } = Typography;
 
-const Dashboard = () => {
-  // Mock Data
-  const trendData = [
-    { x: "2025-03-01", y: 5 },
-    { x: "2025-03-02", y: 8 },
-    { x: "2025-03-03", y: 12 },
-    { x: "2025-03-04", y: 9 },
-    { x: "2025-03-05", y: 15 },
-    { x: "2025-03-06", y: 20 },
-    { x: "2025-03-07", y: 25 },
+const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const items = [
+    {
+      label: "Today",
+      key: "1",
+    },
+    {
+      label: "Yesterday",
+      key: "2",
+    },
+    {
+      label: "Last 7 days",
+      key: "3",
+    },
+    {
+      label: "Last 30 days",
+      key: "4",
+    },
+    {
+      label: "Custom",
+      key: "5",
+    },
+  ];
+  const dataSource = [
+    {
+      key: "1",
+      name: "A",
+      phone: "0000000009",
+      date: "12/05/2568",
+      time: "06:00",
+    },
+    {
+      key: "2",
+      name: "B",
+      phone: "092xxxxxxx",
+      date: "13/05/2568",
+      time: "18:00",
+    },
+    {
+      key: "3",
+      name: "C",
+      phone: "092xxxxxxx",
+      date: "15/05/2568",
+      time: "16:00",
+    },
   ];
 
+  const columns = [
+    {
+      title: "ชื่อคนขับรถ",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "เบอร์โทร",
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: "วันที่ขับ",
+      dataIndex: "date",
+      key: "date",
+    },
+    {
+      title: "จำนวนเที่ยว",
+      dataIndex: "time",
+      key: "time",
+    },
+  ];
+  const menuProps = {
+    items,
+  };
+
   return (
-    <Layout style={{ minHeight: "100vh", display: "flex" }}>
-      <Sider width={220} className="lg:block hidden">
-        <Sidebar />
-      </Sider>
+    <div className={`admin-layout ${sidebarVisible ? "" : "sidebar-closed"}`}>
+      {sidebarVisible && <Sidebar />}
 
-      <Layout>
-        <Header title="ภาพรวม" />
+      <div className="content-area">
+        <Header title="ภาพรวม" toggleSidebar={toggleSidebar} />
 
-        <Content className="dashboard-container">
+        <div className="dashboard-container">
           <div className="content-wrapper">
-            {/* สถิติการจอง */}
-            <Row gutter={16} justify="center">
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <Card className="dashboard-card">
-                  <Statistic
-                    title="จำนวนการจอง"
-                    value={57}
-                    prefix={
-                      <RocketOutlined
-                        style={{ fontSize: "24px", color: "#4CAF50" }}
-                      />
-                    }
-                    valueStyle={{
-                      fontSize: "32px",
-                      fontWeight: "bold",
-                      color: "#4CAF50",
-                    }}
-                    suffix="ครั้ง"
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <Card className="dashboard-card">
-                  <Statistic
-                    title="ระยะทางที่ใช้ไป"
-                    value={45}
-                    prefix={
-                      <EnvironmentOutlined
-                        style={{ fontSize: "24px", color: "#4CAF50" }}
-                      />
-                    }
-                    valueStyle={{
-                      fontSize: "32px",
-                      fontWeight: "bold",
-                      color: "#4CAF50",
-                    }}
-                    suffix="กม."
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <Card className="dashboard-card">
-                  <Statistic
-                    title="รับส่งผู้ป่วยสำเร็จ"
-                    value={45}
-                    prefix={
-                      <CheckCircleOutlined
-                        style={{ fontSize: "24px", color: "#4CAF50" }}
-                      />
-                    }
-                    valueStyle={{
-                      fontSize: "32px",
-                      fontWeight: "bold",
-                      color: "#4CAF50",
-                    }}
-                    suffix="ครั้ง"
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <Card className="dashboard-card">
-                  <Statistic
-                    title="รับส่งผู้ป่วยไม่สำเร็จ"
-                    value={2}
-                    prefix={
-                      <CloseCircleOutlined
-                        style={{ fontSize: "24px", color: "#F44336" }}
-                      />
-                    }
-                    valueStyle={{
-                      fontSize: "32px",
-                      fontWeight: "bold",
-                      color: "#F44336",
-                    }}
-                    suffix="ครั้ง"
-                  />
-                </Card>
-              </Col>
-            </Row>
+            {/* Data Section */}
+            <div className="dashboard-section">
+              <div className="section-header">
+                <Title level={5} className="section-title">
+                  ข้อมูล
+                </Title>
+                <Dropdown menu={menuProps}>
+                  <Button size="small" className="date-filter-btn">
+                    <Space>
+                      Today
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
 
-            {/* กราฟแสดงแนวโน้มการจอง */}
-            <Row gutter={16} justify="center" style={{ marginTop: 20 }}>
-              <Col xs={24} sm={24} md={24} lg={16}>
-                <Card title="แนวโน้มการจอง">
-                  <Line
-                    data={trendData}
-                    xField="x"
-                    yField="y"
-                    point={{ size: 5 }}
-                    label={{
-                      style: {
-                        fill: "#000",
-                        fontSize: 12,
-                      },
-                    }}
-                    smooth
-                    color={"#55A6F3"}
-                  />
-                </Card>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} sm={8} md={8}>
+                  <Card className="stat-card pink-card">
+                    <div className="stat-icon">
+                      <BarChartOutlined />
+                    </div>
+                    <div className="stat-value">$1k</div>
+                    <div className="stat-desc">ยอดส่ง</div>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={8} md={8}>
+                  <Card className="stat-card yellow-card">
+                    <div className="stat-icon">
+                      <FileTextOutlined />
+                    </div>
+                    <div className="stat-value">300</div>
+                    <div className="stat-desc">จำนวนรถ</div>
+                  </Card>
+                </Col>
+                <Col xs={24} sm={8} md={8}>
+                  <Card className="stat-card green-card">
+                    <div className="stat-icon">
+                      <CheckCircleOutlined />
+                    </div>
+                    <div className="stat-value">5</div>
+                    <div className="stat-desc">ส่งสำเร็จ</div>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
+
+            {/* Row with Cost and Invoice Sections */}
+            <Row gutter={[16, 16]}>
+              {/* ต้นทุนรถ Section */}
+              <Col xs={24} md={12}>
+                <div className="dashboard-section">
+                  <div className="section-header">
+                    <Title level={5} className="section-title">
+                      ต้นทุนรถ
+                    </Title>
+                    <Dropdown menu={menuProps}>
+                      <Button size="small" className="date-filter-btn">
+                        <Space>
+                          Today
+                          <DownOutlined />
+                        </Space>
+                      </Button>
+                    </Dropdown>
+                  </div>
+
+                  <Row gutter={[16, 16]}>
+                    <Col xs={24} sm={12}>
+                      <Card className="stat-card pink-card">
+                        <div className="stat-icon">
+                          <BarChartOutlined />
+                        </div>
+                        <div className="stat-value">$1k</div>
+                        <div className="stat-desc">เชื้อเพลง</div>
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Card className="stat-card yellow-card">
+                        <div className="stat-icon">
+                          <FileTextOutlined />
+                        </div>
+                        <div className="stat-value">300</div>
+                        <div className="stat-desc">ค่าซ่อมบำรุง</div>
+                      </Card>
+                    </Col>
+                  </Row>
+                </div>
+              </Col>
+
+              {/* ยอดใบขนขีส Section */}
+              <Col xs={24} md={12}>
+                <div className="dashboard-section">
+                  <div className="section-header">
+                    <Title level={5} className="section-title">
+                      ยอดใบวางบิล
+                    </Title>
+                    <Dropdown menu={menuProps}>
+                      <Button size="small" className="date-filter-btn">
+                        <Space>
+                          Today
+                          <DownOutlined />
+                        </Space>
+                      </Button>
+                    </Dropdown>
+                  </div>
+
+                  <Row gutter={[16, 16]}>
+                    <Col xs={24} sm={12}>
+                      <Card className="stat-card purple-card">
+                        <div className="stat-icon">
+                          <BarChartOutlined />
+                        </div>
+                        <div className="stat-value">$1k</div>
+                        <div className="stat-desc">ยอดรวมใบวางบิล</div>
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Card className="stat-card yellow-card">
+                        <div className="stat-icon">
+                          <FileTextOutlined />
+                        </div>
+                        <div className="stat-value">300</div>
+                        <div className="stat-desc">ใบที่ค้างชำระ</div>
+                      </Card>
+                    </Col>
+                  </Row>
+                </div>
               </Col>
             </Row>
+            {/* Transport Report Section */}
+            <div className="dashboard-section">
+              <div className="section-header">
+                <Title level={5}>รายการการเดินรถของหน่วยงานขับรถบรรทุก</Title>
+                <Dropdown menu={menuProps}>
+                  <Button size="small">
+                    <Space>
+                      Today
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
+
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={14}>
+                  <Card className="table-card">
+                    <Table
+                      dataSource={dataSource}
+                      columns={columns}
+                      pagination={false}
+                      size="middle"
+                    />
+                    <div className="custom-pagination">
+                      <Pagination
+                        current={currentPage}
+                        onChange={setCurrentPage}
+                        total={50}
+                        showSizeChanger={false}
+                        size="small"
+                        itemRender={(page, type) => {
+                          if (type === "prev") {
+                            return <Button size="small">&lt;</Button>;
+                          }
+                          if (type === "next") {
+                            return <Button size="small">&gt;</Button>;
+                          }
+                          return <Button size="small">{page}</Button>;
+                        }}
+                      />
+                    </div>
+                  </Card>
+                </Col>
+                <Col xs={24} md={10}>
+                  <Row gutter={[16, 16]}>
+                    <Col span={24}>
+                      <Card className="stat-summary-card success-card">
+                        <div className="stat-summary-content">
+                          <span className="stat-summary-value">45</span>
+                          <div className="stat-summary-badge">รถ</div>
+                        </div>
+                        <div className="stat-summary-label">จำนวนรถทั้งหมด</div>
+                      </Card>
+                    </Col>
+                    <Col span={24}>
+                      <Card className="stat-summary-card failed-card">
+                        <div className="stat-summary-content">
+                          <span className="stat-summary-value">02</span>
+                          <div className="stat-summary-badge">รถ</div>
+                        </div>
+                        <div className="stat-summary-label">จำนวนเสียหาย</div>
+                      </Card>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+            </div>
           </div>
-        </Content>
-      </Layout>
-    </Layout>
+        </div>
+      </div>
+    </div>
   );
+};
+
+Dashboard.propTypes = {
+  sidebarVisible: PropTypes.bool.isRequired,
+  toggleSidebar: PropTypes.func.isRequired,
 };
 
 export default Dashboard;

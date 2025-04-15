@@ -1,123 +1,89 @@
-/* Sidebar.css */
-
 .sidebar {
-  position: sticky; /* Sticky position */
-  top: 0; /* Keeps it at the top of the viewport */
-  width: 220px;
-  height: 100vh; /* Full viewport height */
+  width: 280px;
+  height: 100vh;
   background-color: #ffffff;
-  padding: 20px;
+  padding: 20px 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 1px 0 5px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
 }
 
 .sidebar-logo {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin-bottom: 30px;
+  padding: 0 24px;
+  margin-bottom: 40px;
 }
 
 .logo-icon {
-  width: 50px;
-  height: 50px;
-  background-color: #ce5942;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .logo-text {
-  margin-top: 10px;
+  font-size: 22px;
   font-weight: bold;
-  color: #333;
-  font-size: 18px;
+  color: #1a2b4e;
+  margin-left: 12px;
 }
 
 .sidebar-nav {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  color: #6b6b6b;
+  padding: 12px 16px;
+  color: #5f6d7e;
   font-size: 16px;
-  text-decoration: none;
   border-radius: 8px;
-  margin-bottom: 10px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .nav-item:hover {
-  background-color: #f0f0f0;
-}
-
-.nav-item span {
-  margin-left: 10px;
+  background-color: #f5f6fa;
+  color: #f5a623;
 }
 
 .nav-item.active {
-  background-color: #ce5942;
-  color: #fff;
-}
-
-.nav-item.active span {
-  font-weight: bold;
+  background-color: #f5a623;
+  color: white;
 }
 
 .nav-item svg {
-  font-size: 18px;
-  color: inherit;
+  font-size: 20px;
+  margin-right: 12px;
 }
 
-/* Dashboard.css */
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 10px 0;
+  }
 
-.table-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
+  .sidebar.collapsed {
+    display: none;
+  }
 
-.table-cell {
-  width: 25%;
-  text-align: left;
-  padding: 4px 8px;
-}
+  .sidebar-logo {
+    margin-bottom: 20px;
+  }
 
-.popularity-bar {
-  width: 40%;
-  height: 8px;
-  background-color: #e5e5e5;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.popularity-bar-fill {
-  height: 100%;
-  border-radius: 5px;
-  transition: width 0.3s ease;
-}
-
-.card-header {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: #1f1f1f;
-  margin-bottom: 20px;
-}
-
-.total-revenue-card {
-  padding: 20px;
-}
-
-.total-revenue-chart {
-  margin-top: 20px;
-}
-
-.top-products-card,
-.top-courses-card {
-  padding: 20px;
-  background-color: #f9fafb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  .logo-text {
+    font-size: 18px;
+  }
 }

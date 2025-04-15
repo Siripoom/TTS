@@ -1,19 +1,20 @@
-import { Avatar, Dropdown, Menu, Breadcrumb } from "antd";
-import "./Header.css";
-import PropTypes from "prop-types";
+import { Avatar, Dropdown, Menu, Breadcrumb, Button } from "antd";
+import { MenuOutlined } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-
 import { HomeOutlined } from "@ant-design/icons";
-const Header = ({ title }) => {
+import "./Header.css";
+import PropTypes from "prop-types";
+
+const Header = ({ title, toggleSidebar }) => {
   const navigate = useNavigate();
-  const location = useLocation(); // ใช้เพื่อดึง path ปัจจุบัน
+  const location = useLocation();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // ตรวจสอบ token หรือข้อมูลผู้ใช้จาก localStorage
+    // Check for user info in localStorage
     const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username"); // สมมติว่า username ถูกเก็บไว้
+    const username = localStorage.getItem("username");
     if (token && username) {
       setUser(username);
     }
@@ -30,13 +31,15 @@ const Header = ({ title }) => {
 
   const menu = (
     <Menu>
+      <Menu.Item key="profile">โปรไฟล์</Menu.Item>
+      <Menu.Item key="settings">ตั้งค่า</Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
-        Logout
+        ออกจากระบบ
       </Menu.Item>
     </Menu>
   );
 
-  // ฟังก์ชันแปลง path ปัจจุบันเป็น Breadcrumb
+  // Generate breadcrumb from current path
   const generateBreadcrumb = () => {
     const pathSnippets = location.pathname.split("/").filter((i) => i);
     return (
@@ -63,16 +66,23 @@ const Header = ({ title }) => {
   return (
     <div className="dashboard-header">
       <div className="header-left">
-        <h3 className="title mb-1">{title}</h3>
-
+        <Button
+          icon={<MenuOutlined />}
+          onClick={toggleSidebar}
+          className="sidebar-toggle"
+        />
+        <h3 className="title">{title}</h3>
         {generateBreadcrumb()}
       </div>
 
       <div className="header-user">
         <Dropdown overlay={menu} trigger={["click"]}>
           <div className="user-info">
+            <Avatar style={{ backgroundColor: "#f5a623" }}>
+              {user ? user.charAt(0).toUpperCase() : "U"}
+            </Avatar>
             <div className="user-details">
-              <span className="user-name">{user}</span>
+              <span className="user-name">{user || "ผู้ใช้งาน"}</span>
             </div>
           </div>
         </Dropdown>
@@ -83,6 +93,7 @@ const Header = ({ title }) => {
 
 Header.propTypes = {
   title: PropTypes.string.isRequired,
+  toggleSidebar: PropTypes.func.isRequired,
 };
 
 export default Header;

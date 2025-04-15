@@ -1,52 +1,115 @@
-import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
-  DashboardOutlined,
-  ShoppingCartOutlined,
-  AppstoreOutlined,
-  ReadOutlined,
-  FileTextOutlined,
   UserOutlined,
-  CalendarOutlined,
+  BoxPlotOutlined,
+  CarOutlined,
+  TeamOutlined,
+  BarChartOutlined,
+  FileTextOutlined,
   LogoutOutlined,
+  PieChartOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 import "./Sidebar.css";
-import logo from "../../assets/ambulance 1.png";
+import logo from "../../assets/ambulance 1.png"; // You may need to update this path
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const [activeItem, setActiveItem] = useState("dashboard");
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("role");
+    navigate("/");
+  };
+
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
-        <img src={logo} alt="IAMPYOQA Logo" className="logo-icon" />
-        <h2 className="logo-text">ระบบรับรถส่งผู้ป่วย</h2>
+        <img src={logo} alt="TransTrack Logo" className="logo-icon" />
+        <h2 className="logo-text">TransTrack</h2>
       </div>
+
       <nav className="sidebar-nav">
         <NavLink
           to="/admin/dashboard"
-          activeClassName="active"
-          className="nav-item"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          onClick={() => setActiveItem("dashboard")}
         >
-          <DashboardOutlined /> <span>ภาพรวม</span>
+          <PieChartOutlined />
+          <span>ภาพรวม</span>
         </NavLink>
 
         <NavLink
-          to="/admin/manage-booking"
-          activeClassName="active"
-          className="nav-item"
+          to="/admin/customers"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          onClick={() => setActiveItem("customers")}
         >
-          <ReadOutlined /> <span>การจอง</span>
+          <UserOutlined />
+          <span>การจัดการลูกค้า</span>
         </NavLink>
 
         <NavLink
-          to="/admin/users"
-          activeClassName="active"
-          className="nav-item"
+          to="/admin/suppliers"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          onClick={() => setActiveItem("suppliers")}
         >
-          <UserOutlined /> <span>ผู้ใช้งาน</span>
+          <BoxPlotOutlined />
+          <span>การจัดการซัพพลายเออร์</span>
         </NavLink>
 
-        <NavLink to="/" activeClassName="active" className="nav-item">
-          <LogoutOutlined /> <span>Sign Out</span>
+        <NavLink
+          to="/admin/truck-queues"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          onClick={() => setActiveItem("truck-queues")}
+        >
+          <CarOutlined />
+          <span>การจัดการคิวรถบรรทุก</span>
         </NavLink>
+
+        <NavLink
+          to="/admin/drivers"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          onClick={() => setActiveItem("drivers")}
+        >
+          <TeamOutlined />
+          <span>การจัดการรถ-พนักงานขับ</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin/costs"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          onClick={() => setActiveItem("costs")}
+        >
+          <DollarOutlined />
+          <span>ต้นทุน</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin/finance"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          onClick={() => setActiveItem("finance")}
+        >
+          <BarChartOutlined />
+          <span>การจัดการเงิน-บัญชี</span>
+        </NavLink>
+
+        <NavLink
+          to="/admin/reports"
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+          onClick={() => setActiveItem("reports")}
+        >
+          <FileTextOutlined />
+          <span>รายงาน-การส่งออก</span>
+        </NavLink>
+
+        <div className="nav-item" onClick={handleLogout}>
+          <LogoutOutlined />
+          <span>ออกจากระบบ</span>
+        </div>
       </nav>
     </div>
   );

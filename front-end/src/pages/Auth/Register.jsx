@@ -2,7 +2,7 @@ import React from "react";
 import { Form, Input, Button, Card } from "antd";
 import { UserOutlined, LockOutlined, PhoneOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import Navbar from "../../components/Navbar/Navbar";
+
 const Register = () => {
   const onFinish = (values) => {
     console.log("Register Data:", values);
@@ -10,7 +10,6 @@ const Register = () => {
 
   return (
     <>
-      <Navbar />
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <Card className="w-full max-w-md p-8 rounded-2xl shadow-lg bg-white">
           <div className="flex flex-col items-center mb-6">

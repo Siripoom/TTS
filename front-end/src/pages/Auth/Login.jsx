@@ -3,7 +3,7 @@ import { Input, Button, Card } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import logo from "../../assets/ambulance 1.png";
 import { Link } from "react-router-dom";
-import Navbar from "../../components/Navbar/Navbar";
+
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -15,7 +15,6 @@ export default function Login() {
 
   return (
     <>
-      <Navbar />
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-blue-100">
         <Card className="p-10 rounded-3xl shadow-xl w-[400px] bg-white border border-gray-200">
           <div className="text-center">

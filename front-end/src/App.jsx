@@ -1,29 +1,137 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "./App.css";
+
+// Auth Pages
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
-import Booking from "./pages/Booking/Booking";
-import BookingSuccess from "./pages/Booking/BookingSuccess";
+
+// Admin Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
-import ManageBooking from "./pages/ManageBooking/ManageBooking";
-import User from "./pages/User/User";
-import ManageBookingDetail from "./pages/ManageBooking/ManageBookingDetail";
+// import Customers from "./pages/Customers/Customers";
+// import Suppliers from "./pages/Suppliers/Suppliers";
+// import TruckQueues from "./pages/TruckQueues/TruckQueues";
+// import Drivers from "./pages/Drivers/Drivers";
+// import Costs from "./pages/Costs/Costs";
+// import Finance from "./pages/Finance/Finance";
+// import Reports from "./pages/Reports/Reports";
+
 function App() {
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+
+  // Handle screen resizing
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarVisible(false);
+      } else {
+        setSidebarVisible(true);
+      }
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/auth/register" element={<Register />} />
-        <Route path="/auth/login" element={<Login />} />
-        <Route path="/" element={<Booking />} />
-        <Route path="/booking/success" element={<BookingSuccess />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/manage-booking" element={<ManageBooking />} />
-        <Route path="/admin/users" element={<User />} />
-        <Route
-          path="/admin/manage-booking/:id"
-          element={<ManageBookingDetail />}
-        />
-      </Routes>
+      <div
+        className={`app-container ${
+          sidebarVisible ? "sidebar-open" : "sidebar-closed"
+        }`}
+      >
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/auth/register" element={<Register />} />
+          <Route path="/auth/login" element={<Login />} />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <Dashboard
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
+          />
+          {/* <Route
+            path="/admin/customers"
+            element={
+              <Customers
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
+          />
+          <Route
+            path="/admin/suppliers"
+            element={
+              <Suppliers
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
+          />
+          <Route
+            path="/admin/truck-queues"
+            element={
+              <TruckQueues
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
+          />
+          <Route
+            path="/admin/drivers"
+            element={
+              <Drivers
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
+          />
+          <Route
+            path="/admin/costs"
+            element={
+              <Costs
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
+          />
+          <Route
+            path="/admin/finance"
+            element={
+              <Finance
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
+          />
+          <Route
+            path="/admin/reports"
+            element={
+              <Reports
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
+          /> */}
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }
