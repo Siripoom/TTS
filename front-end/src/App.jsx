@@ -9,7 +9,7 @@ import Register from "./pages/Auth/Register";
 // Admin Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Customers from "./pages/Customers/Customer";
-// import Suppliers from "./pages/Suppliers/Suppliers";
+import Suppliers from "./pages/Suppliers/Supplier";
 // import TruckQueues from "./pages/TruckQueues/TruckQueues";
 // import Drivers from "./pages/Drivers/Drivers";
 import Costs from "./pages/Cost/Costs";
@@ -76,7 +76,7 @@ function App() {
               />
             }
           />
-          {/* <Route 
+          <Route
             path="/admin/suppliers"
             element={
               <Suppliers
@@ -85,7 +85,7 @@ function App() {
               />
             }
           />
-          <Route
+          {/* <Route
             path="/admin/truck-queues"
             element={
               <TruckQueues
