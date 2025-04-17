@@ -71,7 +71,7 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          to="/admin/drivers"
+          to="/admin/user-and-truck"
           className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
           onClick={() => setActiveItem("drivers")}
         >

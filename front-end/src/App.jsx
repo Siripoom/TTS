@@ -11,8 +11,9 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Customers from "./pages/Customers/Customer";
 import Suppliers from "./pages/Suppliers/Supplier";
 import TruckQueues from "./pages/TruckQueus/TruckQueus";
-// import Drivers from "./pages/Drivers/Drivers";
+import UserAndTruck from "./pages/UserAndTruck/UserAndTruck";
 import Costs from "./pages/Cost/Costs";
+
 // import Finance from "./pages/Finance/Finance";
 // import Reports from "./pages/Reports/Reports";
 
@@ -94,15 +95,15 @@ function App() {
               />
             }
           />
-          {/* <Route
-            path="/admin/drivers"
+          <Route
+            path="/admin/user-and-truck"
             element={
-              <Drivers
+              <UserAndTruck
                 sidebarVisible={sidebarVisible}
                 toggleSidebar={toggleSidebar}
               />
             }
-          />*/}
+          />
           <Route
             path="/admin/costs"
             element={
