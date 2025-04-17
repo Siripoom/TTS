@@ -10,7 +10,7 @@ import Register from "./pages/Auth/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Customers from "./pages/Customers/Customer";
 import Suppliers from "./pages/Suppliers/Supplier";
-// import TruckQueues from "./pages/TruckQueues/TruckQueues";
+import TruckQueues from "./pages/TruckQueus/TruckQueus";
 // import Drivers from "./pages/Drivers/Drivers";
 import Costs from "./pages/Cost/Costs";
 // import Finance from "./pages/Finance/Finance";
@@ -85,7 +85,7 @@ function App() {
               />
             }
           />
-          {/* <Route
+          <Route
             path="/admin/truck-queues"
             element={
               <TruckQueues
@@ -94,7 +94,7 @@ function App() {
               />
             }
           />
-          <Route
+          {/* <Route
             path="/admin/drivers"
             element={
               <Drivers
