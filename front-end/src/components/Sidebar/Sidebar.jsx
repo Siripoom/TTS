@@ -12,7 +12,7 @@ import {
   DollarOutlined,
 } from "@ant-design/icons";
 import "./Sidebar.css";
-import logo from "../../assets/ambulance 1.png"; // You may need to update this path
+import logo from "../../assets/truck 1.jpg"; // You may need to update this path
 
 const Sidebar = () => {
   const navigate = useNavigate();

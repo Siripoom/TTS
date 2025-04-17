@@ -20,20 +20,20 @@ import {
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
 
-import "./Costs.css";
+import "./Customer.css";
 import PropTypes from "prop-types";
 
 const { Title } = Typography;
 
-const Costs = ({ sidebarVisible, toggleSidebar }) => {
+const Customers = ({ sidebarVisible, toggleSidebar }) => {
   return (
     <div className={`admin-layout ${sidebarVisible ? "" : "sidebar-closed"}`}>
       {sidebarVisible && <Sidebar />}
 
       <div className="content-area">
-        <Header title="ต้นทุน" toggleSidebar={toggleSidebar} />
+        <Header title="ลูกค้า" toggleSidebar={toggleSidebar} />
 
-        <div className="costs-container">
+        <div className="customer-container">
           <div className="content-wrapper"></div>
         </div>
       </div>
@@ -41,9 +41,9 @@ const Costs = ({ sidebarVisible, toggleSidebar }) => {
   );
 };
 
-Costs.propTypes = {
+Customers.propTypes = {
   sidebarVisible: PropTypes.bool.isRequired,
   toggleSidebar: PropTypes.func.isRequired,
 };
 
-export default Costs;
+export default Customers;

@@ -8,11 +8,11 @@ import Register from "./pages/Auth/Register";
 
 // Admin Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
-// import Customers from "./pages/Customers/Customers";
+import Customers from "./pages/Customers/Customer";
 // import Suppliers from "./pages/Suppliers/Suppliers";
 // import TruckQueues from "./pages/TruckQueues/TruckQueues";
 // import Drivers from "./pages/Drivers/Drivers";
-// import Costs from "./pages/Costs/Costs";
+import Costs from "./pages/Cost/Costs";
 // import Finance from "./pages/Finance/Finance";
 // import Reports from "./pages/Reports/Reports";
 
@@ -67,7 +67,7 @@ function App() {
               />
             }
           />
-          {/* <Route
+          <Route
             path="/admin/customers"
             element={
               <Customers
@@ -76,7 +76,7 @@ function App() {
               />
             }
           />
-          <Route
+          {/* <Route 
             path="/admin/suppliers"
             element={
               <Suppliers
@@ -102,7 +102,7 @@ function App() {
                 toggleSidebar={toggleSidebar}
               />
             }
-          />
+          />*/}
           <Route
             path="/admin/costs"
             element={
@@ -112,7 +112,7 @@ function App() {
               />
             }
           />
-          <Route
+          {/* <Route
             path="/admin/finance"
             element={
               <Finance
@@ -129,7 +129,7 @@ function App() {
                 toggleSidebar={toggleSidebar}
               />
             }
-          /> */}
+          />  */}
         </Routes>
       </div>
     </BrowserRouter>
