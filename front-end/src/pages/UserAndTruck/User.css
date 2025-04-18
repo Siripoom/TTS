@@ -81,41 +81,12 @@
   border-color: #f5222d;
 }
 
-/* Driver and truck details styling */
-.detail-section {
-  margin-top: 16px;
-}
-
-.detail-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.detail-header {
-  margin-bottom: 16px;
+/* Section header styling */
+.section-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-}
-
-.detail-avatar {
-  display: flex;
-  justify-content: center;
+  align-items: center;
   margin-bottom: 16px;
-}
-
-.detail-info {
-  margin-bottom: 24px;
-}
-
-.info-label {
-  font-weight: 500;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.info-value {
-  color: #333;
 }
 
 /* Responsive adjustments */
@@ -128,17 +99,22 @@
     font-size: 14px;
   }
 
-  .ant-tabs-extra-content {
+  .section-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .ant-tabs-extra-content .ant-input-affix-wrapper {
-    margin-bottom: 8px;
+  .section-header .ant-space {
+    margin-top: 16px;
     width: 100%;
   }
 
-  .ant-tabs-extra-content .ant-btn {
+  .section-header .ant-input-affix-wrapper {
+    width: 100% !important;
+    margin-bottom: 8px;
+  }
+
+  .section-header .ant-btn {
     width: 100%;
   }
 }

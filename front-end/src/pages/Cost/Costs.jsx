@@ -1,20 +1,22 @@
 import { useState } from "react";
-import { Card, Typography, Breadcrumb, Tabs } from "antd";
+import { Tabs } from "antd";
 import {
   ShopOutlined,
   DollarOutlined,
-  CarOutlined,
   ToolOutlined,
+  AppstoreOutlined,
   HomeOutlined,
 } from "@ant-design/icons";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
 import Products from "./Products";
+import FuelCost from "./FuelCost";
+import MaintenanceCost from "./MaintenanceCost";
+import OtherExpenses from "./OtherExpenses";
 
 import "./Costs.css";
 import PropTypes from "prop-types";
 
-const { Title } = Typography;
 const { TabPane } = Tabs;
 
 const Costs = ({ sidebarVisible, toggleSidebar }) => {
@@ -33,6 +35,13 @@ const Costs = ({ sidebarVisible, toggleSidebar }) => {
 
         <div className="costs-container">
           <div className="content-wrapper">
+            <div className="breadcrumb mb-4">
+              <HomeOutlined /> / ต้นทุน /{activeKey === "products" && " สินค้า"}
+              {activeKey === "fuel" && " น้ำมันเชื้อเพลิง"}
+              {activeKey === "maintenance" && " ซ่อมบำรุง"}
+              {activeKey === "other" && " ค่าใช้จ่ายอื่นๆ"}
+            </div>
+
             <Tabs
               activeKey={activeKey}
               onChange={handleTabChange}
@@ -49,10 +58,12 @@ const Costs = ({ sidebarVisible, toggleSidebar }) => {
                 }
                 key="products"
               >
-                <Products
-                  sidebarVisible={sidebarVisible}
-                  toggleSidebar={toggleSidebar}
-                />
+                {activeKey === "products" && (
+                  <Products
+                    sidebarVisible={sidebarVisible}
+                    toggleSidebar={toggleSidebar}
+                  />
+                )}
               </TabPane>
 
               <TabPane
@@ -64,10 +75,12 @@ const Costs = ({ sidebarVisible, toggleSidebar }) => {
                 }
                 key="fuel"
               >
-                <div className="placeholder-content">
-                  <Title level={4}>ข้อมูลน้ำมันเชื้อเพลิง</Title>
-                  <p>ส่วนนี้จะแสดงข้อมูลเกี่ยวกับต้นทุนน้ำมันเชื้อเพลิง</p>
-                </div>
+                {activeKey === "fuel" && (
+                  <FuelCost
+                    sidebarVisible={sidebarVisible}
+                    toggleSidebar={toggleSidebar}
+                  />
+                )}
               </TabPane>
 
               <TabPane
@@ -79,28 +92,29 @@ const Costs = ({ sidebarVisible, toggleSidebar }) => {
                 }
                 key="maintenance"
               >
-                <div className="placeholder-content">
-                  <Title level={4}>ข้อมูลซ่อมบำรุง</Title>
-                  <p>ส่วนนี้จะแสดงข้อมูลเกี่ยวกับต้นทุนการซ่อมบำรุง</p>
-                </div>
+                {activeKey === "maintenance" && (
+                  <MaintenanceCost
+                    sidebarVisible={sidebarVisible}
+                    toggleSidebar={toggleSidebar}
+                  />
+                )}
               </TabPane>
 
               <TabPane
                 tab={
                   <span>
-                    <CarOutlined />
+                    <AppstoreOutlined />
                     ค่าใช้จ่ายอื่นๆ
                   </span>
                 }
                 key="other"
               >
-                <div className="placeholder-content">
-                  <Title level={4}>ค่าใช้จ่ายอื่นๆ</Title>
-                  <p>
-                    ส่วนนี้จะแสดงข้อมูลเกี่ยวกับค่าใช้จ่ายอื่นๆ
-                    ที่เกี่ยวข้องกับต้นทุน
-                  </p>
-                </div>
+                {activeKey === "other" && (
+                  <OtherExpenses
+                    sidebarVisible={sidebarVisible}
+                    toggleSidebar={toggleSidebar}
+                  />
+                )}
               </TabPane>
             </Tabs>
           </div>

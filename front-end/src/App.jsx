@@ -14,7 +14,7 @@ import TruckQueues from "./pages/TruckQueus/TruckQueus";
 import UserAndTruck from "./pages/UserAndTruck/UserAndTruck";
 import Costs from "./pages/Cost/Costs";
 
-// import Finance from "./pages/Finance/Finance";
+import Finance from "./pages/Accounts/Account";
 // import Reports from "./pages/Reports/Reports";
 
 function App() {
@@ -113,7 +113,7 @@ function App() {
               />
             }
           />
-          {/* <Route
+          <Route
             path="/admin/finance"
             element={
               <Finance
@@ -122,7 +122,7 @@ function App() {
               />
             }
           />
-          <Route
+          {/*<Route
             path="/admin/reports"
             element={
               <Reports
