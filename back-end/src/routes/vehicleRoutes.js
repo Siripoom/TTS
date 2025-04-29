@@ -15,12 +15,12 @@ const router = express.Router();
 
 // Validation rules
 const vehicleValidation = [
-  body("plateNumber")
-    .trim()
-    .notEmpty()
-    .withMessage("Plate number is required")
-    .matches(/^[A-Z0-9-]+$/)
-    .withMessage("Invalid plate number format"),
+  // body("plateNumber")
+  //   .trim()
+  //   .notEmpty()
+  //   .withMessage("Plate number is required")
+  //   .matches(/^[A-Z0-9-]+$/)
+  //   .withMessage("Invalid plate number format"),
 
   body("model")
     .optional()

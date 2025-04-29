@@ -11,9 +11,20 @@ const prisma = new PrismaClient();
 export const getAllProducts = async (req, res) => {
   try {
     const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        costPrice: true,
+        sellingPrice: true,
+        createdAt: true,
+        updatedAt: true,
+        supplier: true,
+      },
       orderBy: {
         name: "asc",
       },
+
     });
 
     res.status(200).json({
@@ -79,7 +90,7 @@ export const createProduct = async (req, res) => {
     });
   }
 
-  const { name, category, costPrice, sellingPrice } = req.body;
+  const { name, category, costPrice, sellingPrice, supplierId } = req.body;
 
   try {
     // Check if product with same name exists
@@ -105,6 +116,7 @@ export const createProduct = async (req, res) => {
         category,
         costPrice: parseFloat(costPrice),
         sellingPrice: parseFloat(sellingPrice),
+        supplierId
       },
     });
 
@@ -137,7 +149,7 @@ export const updateProduct = async (req, res) => {
   }
 
   try {
-    const { name, category, costPrice, sellingPrice } = req.body;
+    const { name, category, costPrice, sellingPrice, supplierId } = req.body;
 
     // Check if product exists
     const productExists = await prisma.product.findUnique({
@@ -180,6 +192,7 @@ export const updateProduct = async (req, res) => {
     if (costPrice !== undefined) updateData.costPrice = parseFloat(costPrice);
     if (sellingPrice !== undefined)
       updateData.sellingPrice = parseFloat(sellingPrice);
+    if (supplierId) updateData.supplierId = supplierId;
 
     const updatedProduct = await prisma.product.update({
       where: {

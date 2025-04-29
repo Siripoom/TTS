@@ -31,6 +31,7 @@ import Header from "../../components/Header/Header";
 
 import "./Customer.css";
 import PropTypes from "prop-types";
+import { addCustomer, getCustomers, updateCustomer, deleteCustomer } from "../../services/api";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -46,8 +47,21 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
   const [form] = Form.useForm();
   const pageSize = 10;
 
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     // Mock data - replace with actual API call later
+    const fetchCustomers = async () => {
+      const res = await getCustomers(token);
+      if (res) {
+        console.log(res.data)
+        setCustomers(res.data);
+      } else {
+        message.error("ไม่สามารถดึงข้อมูลลูกค้าได้");
+      }
+    }
+
+    fetchCustomers();
     const mockCustomers = [
       {
         id: "1",
@@ -96,6 +110,7 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
   );
 
   const showModal = (customer = null) => {
+    console.log(customers);
     setSelectedCustomer(customer);
     if (customer) {
       form.setFieldsValue({
@@ -115,8 +130,15 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
     setSelectedCustomer(null);
   };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     if (selectedCustomer) {
+      const res = await updateCustomer(values, selectedCustomer.id, token);
+      if (res.success === false) {
+        // Handle error
+        console.error("Error updating customer:", res);
+        message.error("ไม่สามารถอัพเดตข้อมูลลูกค้าได้");
+        return;
+      }
       // Update existing customer
       const updatedCustomers = customers.map((c) =>
         c.id === selectedCustomer.id ? { ...c, ...values } : c
@@ -125,13 +147,22 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
       message.success("ข้อมูลลูกค้าได้รับการอัพเดตแล้ว");
     } else {
       // Create new customer
-      const newCustomer = {
-        id: (customers.length + 1).toString(),
-        ...values,
-        createdAt: new Date().toLocaleDateString("th-TH"),
-        purchases: [],
-      };
-      setCustomers([...customers, newCustomer]);
+      const res = await addCustomer(values, token);
+      if (res.success === false) {
+        // Handle error
+        console.error("Error adding customer:", res);
+        message.error("ไม่สามารถเพิ่มลูกค้าได้");
+        return;
+      }
+      
+      // const newCustomer = {
+      //   id: (customers.length + 1).toString(),
+      //   ...values,
+      //   createdAt: new Date().toLocaleDateString("th-TH"),
+      //   purchases: [],
+      // };
+      // setCustomers([...customers, newCustomer]);
+      setCustomers([...customers, res.data]);
       message.success("เพิ่มลูกค้าใหม่แล้ว");
     }
     setIsModalVisible(false);
@@ -142,8 +173,16 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
     setIsDeleteModalVisible(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (customerToDelete) {
+      // Call API to delete customer
+      const res = await deleteCustomer(customerToDelete.id, token);
+      if (!res.success) {
+        // Handle error
+        console.error("Error deleting customer:", res);
+        message.error("ไม่สามารถลบลูกค้าได้");
+        return;
+      }
       const updatedCustomers = customers.filter(
         (c) => c.id !== customerToDelete.id
       );
@@ -180,7 +219,7 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
       title: "ราคาค่าขนส่ง",
       dataIndex: "pricePerTrip",
       key: "pricePerTrip",
-      render: (price) => `฿${price.toFixed(2)}`,
+      render: (price) => `฿${typeof price === "number" ? price.toFixed(2) : "0.00"}`,
     },
     {
       title: "วันที่สร้าง",
@@ -209,6 +248,49 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
             onClick={() => showDeleteConfirm(record)}
           />
         </Space>
+      ),
+    },
+  ];
+
+  const invoiceColumns = [
+    {
+      title: "เลขใบวางบิล",
+      dataIndex: "invoiceNumber",
+      key: "invoiceNumber",
+    },
+    {
+      title: "วันที่",
+      dataIndex: "date",
+      key: "date",
+    },
+    {
+      title: "จำนวนเงิน",
+      dataIndex: "amount",
+      key: "amount",
+      render: (amount) => `฿${amount.toFixed(2)}`,
+    },
+    {
+      title: "สถานะ",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <span
+          style={{
+            color: status === "ชำระแล้ว" ? "#52c41a" : "#f5222d",
+            fontWeight: "bold",
+          }}
+        >
+          {status}
+        </span>
+      ),
+    },
+    {
+      title: "",
+      key: "action",
+      render: (_, record) => (
+        <Button type="link" onClick={() => showInvoiceDetails(record.id)}>
+          ดูรายละเอียด
+        </Button>
       ),
     },
   ];
@@ -312,7 +394,7 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
                     <Col xs={24} md={16}>
                       <Card className="purchase-card">
                         <Tabs defaultActiveKey="1">
-                          <TabPane tab="ประวัติการซื้อ" key="1">
+                          {/* <TabPane tab="ประวัติการซื้อ" key="1">
                             <Table
                               columns={purchaseColumns}
                               dataSource={selectedCustomer.purchases}
@@ -337,16 +419,37 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
                                 );
                               }}
                             />
-                          </TabPane>
-                          <TabPane tab="การส่งสินค้า" key="2">
+                          </TabPane> */}
+                          {/* <TabPane tab="การส่งสินค้า" key="2">
                             <div className="empty-content">
                               <p>ไม่มีข้อมูลการส่งสินค้า</p>
                             </div>
-                          </TabPane>
-                          <TabPane tab="ใบวางบิล" key="3">
-                            <div className="empty-content">
-                              <p>ไม่มีข้อมูลใบวางบิล</p>
-                            </div>
+                          </TabPane> */}
+                          <TabPane tab="ใบวางบิล" key="1">
+                            <Table
+                              columns={invoiceColumns}
+                              dataSource={selectedCustomer.Invoice}
+                              pagination={false}
+                              rowKey="id"
+                              // summary={(pageData) => {
+                              //   let totalAmount = 0;
+                              //   pageData.forEach(({ amount }) => {
+                              //     totalAmount += amount;
+                              //   });
+                              //   return (
+                              //     <Table.Summary.Row>
+                              //       <Table.Summary.Cell colSpan={2}>
+                              //         <strong>รวมทั้งหมด</strong>
+                              //       </Table.Summary.Cell>
+                              //       <Table.Summary.Cell>
+                              //         <Text strong>
+                              //           ฿{totalAmount.toFixed(2)}
+                              //         </Text>
+                              //       </Table.Summary.Cell>
+                              //     </Table.Summary.Row>
+                              //   );
+                              // }}
+                            />
                           </TabPane>
                         </Tabs>
                       </Card>

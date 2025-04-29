@@ -87,8 +87,10 @@ export const register = async (req, res) => {
  * @route   POST /api/auth/login
  * @access  Public
  */
+
 export const login = async (req, res) => {
   try {
+    console.log("hi")
     // Validate request data
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

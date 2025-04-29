@@ -1,11 +1,19 @@
 import React from "react";
-import { Form, Input, Button, Card } from "antd";
-import { UserOutlined, LockOutlined, PhoneOutlined } from "@ant-design/icons";
+import { Form, Input, Button, Card, message } from "antd";
+import { UserOutlined, LockOutlined, PhoneOutlined , MailOutlined} from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import { register } from "../../services/api"; // Adjust the import path as necessary
+import { useNavigate } from "react-router-dom";
+
 
 const Register = () => {
-  const onFinish = (values) => {
+  const navigate = useNavigate();
+
+  const onFinish = async (values) => {
     console.log("Register Data:", values);
+    await register(values);
+    message.success("ลงทะเบียนสําเร็จ");
+    navigate("/auth/login");
   };
 
   return (
@@ -29,10 +37,17 @@ const Register = () => {
             size="large"
           >
             <Form.Item
-              name="username"
+              name="name"
               rules={[{ required: true, message: "โปรดป้อนชื่อผู้ใช้" }]}
             >
               <Input prefix={<UserOutlined />} placeholder="ชื่อผู้ใช้งาน" />
+            </Form.Item>
+
+            <Form.Item
+              name="email"
+              rules={[{ required: true, message: "โปรดป้อนชื่อผู้ใช้" }]}
+            >
+              <Input type="email"  prefix={<MailOutlined />} placeholder="อีเมล" />
             </Form.Item>
 
             <Form.Item

@@ -1,16 +1,53 @@
 import { useState } from "react";
-import { Input, Button, Card } from "antd";
+import { Input, Button, Card, message } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import logo from "../../assets/ambulance 1.png";
 import { Link } from "react-router-dom";
+import { login } from "../../services/api";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    console.log("Logging in with", username, password);
-    // TODO: Connect with authentication API
+  const handleLogin = async () => {
+    if (!email || !password) {
+      message.warning("กรุณากรอกอีเมลและรหัสผ่าน");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = { email, password };
+      const res = await login(data);
+
+      if (res && res.token) {
+        localStorage.setItem("token", res.token);
+        message.success("เข้าสู่ระบบสำเร็จ");
+        const token = localStorage.getItem("token"); // ดึง token จาก localStorage
+        if (token) {
+          try {
+            const decodedToken = jwtDecode(token); // decode token
+            //Check role
+            navigate("/admin/dashboard");
+
+            console.log(decodedToken);
+          } catch (error) {
+            console.error("Error decoding token:", error);
+          }
+        }
+      } else {
+        message.error("เข้าสู่ระบบไม่สำเร็จ: ข้อมูลไม่ถูกต้อง");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      message.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,10 +65,10 @@ export default function Login() {
           <div className="mt-8 space-y-5">
             <Input
               size="large"
-              placeholder="ชื่อผู้ใช้งาน"
+              placeholder="อีเมล"
               prefix={<UserOutlined className="text-gray-400" />}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="rounded-lg"
             />
 

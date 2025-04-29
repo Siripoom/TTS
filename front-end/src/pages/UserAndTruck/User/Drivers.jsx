@@ -37,6 +37,8 @@ import {
 import "../User.css";
 import PropTypes from "prop-types";
 import dayjs from "dayjs"; // Make sure dayjs is imported
+import { addDriver, deleteDriver, updateDriver } from "../../../services/api";
+
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -58,6 +60,7 @@ const Drivers = ({
   const [driverDetailVisible, setDriverDetailVisible] = useState(false);
   const [viewingDriver, setViewingDriver] = useState(null);
   const pageSize = 5;
+  const token = localStorage.getItem("token");
 
   // Filter drivers based on search text
   const filteredDrivers = drivers.filter(
@@ -102,8 +105,8 @@ const Drivers = ({
     },
     {
       title: "เลขใบขับขี่",
-      dataIndex: "licenseNumber",
-      key: "licenseNumber",
+      dataIndex: "licenseNo",
+      key: "licenseNo",
     },
     {
       title: "ประเภทใบขับขี่",
@@ -141,19 +144,21 @@ const Drivers = ({
 
   // Driver details modal
   const showDriverModal = (driver = null) => {
+    console.log(driver)
     setSelectedDriver(driver);
     if (driver) {
+      console.log(driver)
       driverForm.setFieldsValue({
         name: driver.name,
         phone: driver.phone,
-        licenseNumber: driver.licenseNumber,
+        licenseNo: driver.licenseNo,
         licenseType: driver.licenseType,
-        licenseExpiry: driver.licenseExpiry,
+        licenseExpire: dayjs(driver.licenseExpiry),
         status: driver.status,
         address: driver.address,
-        birthdate: driver.birthdate,
-        startDate: driver.startDate,
-        assignedVehicleId: driver.assignedVehicle
+        birthDay: dayjs(driver.birthDay),
+        workStart: dayjs(driver.workStart),
+        vehicleId: driver.assignedVehicle
           ? driver.assignedVehicle.id
           : null,
       });
@@ -170,14 +175,17 @@ const Drivers = ({
   };
 
   // Handle driver form submission
-  const handleDriverFormSubmit = (values) => {
+  const handleDriverFormSubmit = async (values) => {
+    console.log("Driver Form Values:", values); // Log the form values
     if (selectedDriver) {
       // Update existing driver
+      const res = await updateDriver(values, selectedDriver.id, token);
+      console.log(res)
       const updatedDriver = {
         ...selectedDriver,
         ...values,
-        assignedVehicle: values.assignedVehicleId
-          ? trucks.find((truck) => truck.id === values.assignedVehicleId)
+        assignedVehicle: values.assignedVehicle
+          ? trucks.find((truck) => truck.id === values.assignedVehicle)
           : null,
       };
 
@@ -189,18 +197,31 @@ const Drivers = ({
       message.success("อัพเดตข้อมูลพนักงานขับรถสำเร็จ");
     } else {
       // Add new driver
-      const newDriver = {
-        id: (drivers.length + 1).toString(),
-        ...values,
-        trips: 0,
-        totalKm: 0,
-        avgRating: 0,
-        assignedVehicle: values.assignedVehicleId
-          ? trucks.find((truck) => truck.id === values.assignedVehicleId)
-          : null,
-      };
-
-      setDrivers([...drivers, newDriver]);
+      const res = await addDriver(values,token);
+      console.log(res)
+      // const newDriver = {
+      //   id: (drivers.length + 1).toString(),
+      //   ...values,
+      //   trips: 0,
+      //   totalKm: 0,
+      //   avgRating: 0,
+      //   assignedVehicle: values.assignedVehicleId
+      //     ? trucks.find((truck) => truck.id === values.assignedVehicleId)
+      //     : null,
+      // };
+      let data = {
+        address: res.data.address,
+        birthDay: res.data.birthDay,
+        licenseExpire: res.data.licenseExpire,
+        licenseNo: res.data.licenseNo,
+        phone: res.data.phone,
+        licenseType: res.data.licenseType,
+        workStart: res.data.workStart,
+        assignedVehicle: res.data.vehicle,
+        id: res.data.id,
+        name: res.data.name
+      }
+      setDrivers([...drivers, data]);
       message.success("เพิ่มพนักงานขับรถสำเร็จ");
     }
 
@@ -215,8 +236,13 @@ const Drivers = ({
   };
 
   // Delete driver
-  const handleDeleteDriver = () => {
+  const handleDeleteDriver = async () => {
     if (driverToDelete) {
+      const res = await deleteDriver(driverToDelete.id, token);
+      if(res.success === false){
+        message.error(res.message);
+        return;
+      }
       const updatedDrivers = drivers.filter(
         (driver) => driver.id !== driverToDelete.id
       );
@@ -309,7 +335,7 @@ const Drivers = ({
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
-                name="licenseNumber"
+                name="licenseNo"
                 label="เลขใบขับขี่"
                 rules={[{ required: true, message: "กรุณากรอกเลขใบขับขี่" }]}
               >
@@ -334,7 +360,7 @@ const Drivers = ({
             </Col>
             <Col span={8}>
               <Form.Item
-                name="licenseExpiry"
+                name="licenseExpire"
                 label="วันหมดอายุใบขับขี่"
                 rules={[
                   { required: true, message: "กรุณากรอกวันหมดอายุใบขับขี่" },
@@ -348,7 +374,7 @@ const Drivers = ({
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
-                name="birthdate"
+                name="birthDay"
                 label="วันเกิด"
                 rules={[{ required: true, message: "กรุณากรอกวันเกิด" }]}
               >
@@ -357,7 +383,7 @@ const Drivers = ({
             </Col>
             <Col span={8}>
               <Form.Item
-                name="startDate"
+                name="workStart"
                 label="วันที่เริ่มงาน"
                 rules={[{ required: true, message: "กรุณากรอกวันที่เริ่มงาน" }]}
               >
@@ -365,8 +391,9 @@ const Drivers = ({
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="assignedVehicleId" label="รถที่ขับประจำ">
+              <Form.Item name="vehicleId" label="รถที่ขับประจำ">
                 <Select allowClear placeholder="เลือกรถบรรทุก">
+                  <Option value={null}>ไม่มีรถ</Option>
                   {trucks.map((truck) => (
                     <Option key={truck.id} value={truck.id}>
                       {truck.plateNumber} - {truck.model}
