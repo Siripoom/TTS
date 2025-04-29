@@ -3,6 +3,7 @@ import { MenuOutlined } from "@ant-design/icons";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { HomeOutlined } from "@ant-design/icons";
+import { jwtDecode } from "jwt-decode";
 import "./Header.css";
 import PropTypes from "prop-types";
 
@@ -14,7 +15,8 @@ const Header = ({ title, toggleSidebar }) => {
   useEffect(() => {
     // Check for user info in localStorage
     const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username");
+    const decodedToken = token ? JSON.parse(atob(token.split(".")[1])) : null;
+    const username = jwtDecode(token)?.name;
     if (token && username) {
       setUser(username);
     }

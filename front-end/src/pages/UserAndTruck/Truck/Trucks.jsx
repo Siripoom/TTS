@@ -36,6 +36,7 @@ import {
 
 import "../User.css";
 import PropTypes from "prop-types";
+import { addVehicle, deleteVehicle, updateVehicle } from "../../../services/api";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -51,6 +52,8 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
   const [truckDetailVisible, setTruckDetailVisible] = useState(false);
   const [viewingTruck, setViewingTruck] = useState(null);
   const pageSize = 5;
+  const token = localStorage.getItem("token");
+
 
   // Filter trucks based on search text
   const filteredTrucks = trucks.filter(
@@ -98,8 +101,8 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
     },
     {
       title: "เลขไมล์",
-      dataIndex: "mileage",
-      key: "mileage",
+      dataIndex: "capacity",
+      key: "capacity",
       render: (mileage) => (mileage ? mileage : "-"),
     },
 
@@ -169,9 +172,19 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
   };
 
   // Handle truck form submission
-  const handleTruckFormSubmit = (values) => {
+  const handleTruckFormSubmit = async (values) => {
+    const preload = {
+      ...values, driverId: values.assignedDriverId,
+    }
+    console.log(preload)
     if (selectedTruck) {
       // Update existing truck
+      const res = await updateVehicle(preload, selectedTruck.id, token);
+      if (!res.success) {
+        message.error("ไม่สามารถอัพเดตข้อมูลรถบรรทุกได้ในขณะนี้");
+        return;
+      }
+
       const updatedTruck = {
         ...selectedTruck,
         ...values,
@@ -188,17 +201,14 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
       message.success("อัพเดตข้อมูลรถบรรทุกสำเร็จ");
     } else {
       // Add new truck
-      const newTruck = {
-        id: (trucks.length + 1).toString(),
-        ...values,
-        mileage: values.mileage || 0,
-        maintenanceHistory: [],
-        assignedDriver: values.assignedDriverId
-          ? drivers.find((driver) => driver.id === values.assignedDriverId)
-          : null,
-      };
+      const res = await addVehicle(preload, token)
+      if (!res.success) {
+        message.error("ไม่สามารถเพิ่มรถบรรทุกได้ในขณะนี้");
+        return;
+      }
 
-      setTrucks([...trucks, newTruck]);
+
+      setTrucks([...trucks, res.data]);
       message.success("เพิ่มรถบรรทุกสำเร็จ");
     }
 
@@ -213,8 +223,9 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
   };
 
   // Delete truck
-  const handleDeleteTruck = () => {
+  const handleDeleteTruck = async () => {
     if (truckToDelete) {
+      await deleteVehicle(truckToDelete.id, token); 
       const updatedTrucks = trucks.filter(
         (truck) => truck.id !== truckToDelete.id
       );
@@ -293,7 +304,7 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
             </Col>
             <Col span={8}>
               <Form.Item
-                name="fuelType"
+                name="type"
                 label="ประเภทเชื้อเพลิง"
                 rules={[
                   { required: true, message: "กรุณาเลือกประเภทเชื้อเพลิง" },
@@ -324,7 +335,7 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="type"
+                name="model"
                 label="ประเภท"
                 rules={[{ required: true, message: "กรุณาเลือกประเภทรถ" }]}
               >
@@ -338,7 +349,7 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
             </Col>
             <Col span={12}>
               <Form.Item
-                name="mileage"
+                name="capacity"
                 label="เลขไมล์ (กม.)"
                 rules={[{ required: true, message: "กรุณากรอกเลขไมล์" }]}
               >
@@ -482,7 +493,7 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
                       ประวัติการซ่อมบำรุง
                     </Typography.Title>
                     {viewingTruck.maintenanceHistory &&
-                    viewingTruck.maintenanceHistory.length > 0 ? (
+                      viewingTruck.maintenanceHistory.length > 0 ? (
                       <Timeline style={{ marginTop: "16px" }}>
                         {viewingTruck.maintenanceHistory.map((item, index) => (
                           <Timeline.Item key={index}>

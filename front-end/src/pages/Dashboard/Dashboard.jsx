@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   Row,
@@ -22,11 +22,46 @@ import Header from "../../components/Header/Header";
 
 import "./Dashboard.css";
 import PropTypes from "prop-types";
+import { getUser } from "../../services/api";
 
 const { Title } = Typography;
 
 const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [dataSource, setDataSource] = useState([
+    {
+      key: "1",
+      name: "A",
+      phone: "0000000009",
+      date: "12/05/2568",
+      time: "06:00",
+    },
+    {
+      key: "2", 
+      name: "B",
+      phone: "092xxxxxxx",
+      date: "13/05/2568",
+      time: "18:00",
+    },
+    {
+      key: "3",
+      name: "C",
+      phone: "092xxxxxxx",
+      date: "15/05/2568",
+      time: "16:00",
+    },
+  ]);
+
+  const findUserDriver = async () => {
+    const res = await getUser();
+    const userDriver = res.data.filter((user) => user.role === "driver");
+    setDataSource(userDriver);
+  }
+
+  useEffect(() => {
+    findUserDriver();
+  }, []);
+
   const items = [
     {
       label: "Today",
@@ -47,29 +82,6 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
     {
       label: "Custom",
       key: "5",
-    },
-  ];
-  const dataSource = [
-    {
-      key: "1",
-      name: "A",
-      phone: "0000000009",
-      date: "12/05/2568",
-      time: "06:00",
-    },
-    {
-      key: "2",
-      name: "B",
-      phone: "092xxxxxxx",
-      date: "13/05/2568",
-      time: "18:00",
-    },
-    {
-      key: "3",
-      name: "C",
-      phone: "092xxxxxxx",
-      date: "15/05/2568",
-      time: "16:00",
     },
   ];
 

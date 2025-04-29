@@ -31,6 +31,7 @@ import {
 
 import "./Products.css";
 import PropTypes from "prop-types";
+import { addProduct, deleteProduct, getProducts, getSuppliers, updateProduct } from "../../services/api";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -43,6 +44,7 @@ const Products = ({ sidebarVisible }) => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [suppliers, setSuppliers] = useState([]);
   const [form] = Form.useForm();
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -53,164 +55,73 @@ const Products = ({ sidebarVisible }) => {
   });
 
   const pageSize = 10;
-
+  const token = localStorage.getItem("token");
+  let totalProducts = 0;
+  let totalCostPrice = 0;
+  let totalSellingPrice = 0;
   // Load mock data for products
+  const fetchProduct = async () => {
+    try {
+      const res = await getProducts(token);
+      console.log(res)
+      totalProducts = res.data.length;
+      totalCostPrice = res.data.reduce(
+        (sum, product) => sum + product.costPrice,
+        0
+      );
+      totalSellingPrice = res.data.reduce(
+        (sum, product) => sum + product.sellingPrice,
+        0
+      );
+
+      const categoryMap = {};
+      res.data.forEach((product) => {
+        if (!categoryMap[product.category]) {
+          categoryMap[product.category] = {
+            count: 0,
+            totalCost: 0,
+            totalSelling: 0,
+          };
+        }
+        categoryMap[product.category].count += 1;
+        categoryMap[product.category].totalCost += product.costPrice;
+        categoryMap[product.category].totalSelling += product.sellingPrice;
+      });
+
+      const categories = Object.keys(categoryMap).map((category) => ({
+        name: category,
+        count: categoryMap[category].count,
+        avgPrice:
+          categoryMap[category].totalSelling / categoryMap[category].count,
+      }));
+
+      setStats({
+        totalProducts,
+        avgCostPrice: totalCostPrice / totalProducts,
+        avgSellingPrice: totalSellingPrice / totalProducts,
+        avgProfit: (totalSellingPrice - totalCostPrice) / totalProducts,
+        categories,
+      });
+
+      setProducts(res.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+  const fetchSuppliers = async () => {
+    try {
+      const res = await getSuppliers(token);
+      console.log(res)
+      setSuppliers(res.data);
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
   useEffect(() => {
-    // Mock data for products
-    const mockProducts = [
-      {
-        id: "1",
-        name: "ชิ้นส่วนเครื่องยนต์",
-        category: "อะไหล่รถยนต์",
-        costPrice: 5000.0,
-        sellingPrice: 7500.0,
-        createdAt: "2025-03-15",
-        updatedAt: "2025-03-15",
-      },
-      {
-        id: "2",
-        name: "น้ำมันเครื่อง Premium",
-        category: "น้ำมันและสารหล่อลื่น",
-        costPrice: 350.0,
-        sellingPrice: 499.0,
-        createdAt: "2025-03-10",
-        updatedAt: "2025-03-10",
-      },
-      {
-        id: "3",
-        name: "ยางรถยนต์ขนาด 16 นิ้ว",
-        category: "ยางรถยนต์",
-        costPrice: 2500.0,
-        sellingPrice: 3600.0,
-        createdAt: "2025-03-05",
-        updatedAt: "2025-03-08",
-      },
-      {
-        id: "4",
-        name: "เบรก ABS",
-        category: "อะไหล่รถยนต์",
-        costPrice: 3200.0,
-        sellingPrice: 4800.0,
-        createdAt: "2025-03-02",
-        updatedAt: "2025-03-02",
-      },
-      {
-        id: "5",
-        name: "กระจกมองข้าง",
-        category: "อุปกรณ์ตกแต่ง",
-        costPrice: 1800.0,
-        sellingPrice: 2500.0,
-        createdAt: "2025-02-28",
-        updatedAt: "2025-02-28",
-      },
-      {
-        id: "6",
-        name: "แบตเตอรี่รถยนต์",
-        category: "อะไหล่รถยนต์",
-        costPrice: 3500.0,
-        sellingPrice: 4900.0,
-        createdAt: "2025-02-25",
-        updatedAt: "2025-02-25",
-      },
-      {
-        id: "7",
-        name: "น้ำยาหล่อเย็น",
-        category: "น้ำมันและสารหล่อลื่น",
-        costPrice: 280.0,
-        sellingPrice: 450.0,
-        createdAt: "2025-02-20",
-        updatedAt: "2025-02-20",
-      },
-      {
-        id: "8",
-        name: "ไส้กรองอากาศ",
-        category: "อะไหล่รถยนต์",
-        costPrice: 450.0,
-        sellingPrice: 650.0,
-        createdAt: "2025-02-18",
-        updatedAt: "2025-02-18",
-      },
-      {
-        id: "9",
-        name: "หลอดไฟหน้า LED",
-        category: "อุปกรณ์ตกแต่ง",
-        costPrice: 1200.0,
-        sellingPrice: 1800.0,
-        createdAt: "2025-02-15",
-        updatedAt: "2025-02-15",
-      },
-      {
-        id: "10",
-        name: "น้ำยาล้างหัวฉีด",
-        category: "น้ำมันและสารหล่อลื่น",
-        costPrice: 180.0,
-        sellingPrice: 320.0,
-        createdAt: "2025-02-10",
-        updatedAt: "2025-02-10",
-      },
-      {
-        id: "11",
-        name: "ล้อแม็กซ์",
-        category: "อุปกรณ์ตกแต่ง",
-        costPrice: 4500.0,
-        sellingPrice: 6800.0,
-        createdAt: "2025-02-05",
-        updatedAt: "2025-02-05",
-      },
-      {
-        id: "12",
-        name: "เบาะหนังแท้",
-        category: "อุปกรณ์ตกแต่งภายใน",
-        costPrice: 8500.0,
-        sellingPrice: 12000.0,
-        createdAt: "2025-02-01",
-        updatedAt: "2025-02-01",
-      },
-    ];
-
-    setProducts(mockProducts);
-
-    // Calculate statistics
-    const totalProducts = mockProducts.length;
-    const totalCostPrice = mockProducts.reduce(
-      (sum, product) => sum + product.costPrice,
-      0
-    );
-    const totalSellingPrice = mockProducts.reduce(
-      (sum, product) => sum + product.sellingPrice,
-      0
-    );
-
-    // Group by category
-    const categoryMap = {};
-    mockProducts.forEach((product) => {
-      if (!categoryMap[product.category]) {
-        categoryMap[product.category] = {
-          count: 0,
-          totalCost: 0,
-          totalSelling: 0,
-        };
-      }
-      categoryMap[product.category].count += 1;
-      categoryMap[product.category].totalCost += product.costPrice;
-      categoryMap[product.category].totalSelling += product.sellingPrice;
-    });
-
-    const categories = Object.keys(categoryMap).map((category) => ({
-      name: category,
-      count: categoryMap[category].count,
-      avgPrice:
-        categoryMap[category].totalSelling / categoryMap[category].count,
-    }));
-
-    setStats({
-      totalProducts,
-      avgCostPrice: totalCostPrice / totalProducts,
-      avgSellingPrice: totalSellingPrice / totalProducts,
-      avgProfit: (totalSellingPrice - totalCostPrice) / totalProducts,
-      categories,
-    });
+    fetchProduct();
+    fetchSuppliers();
   }, []);
+
 
   // Filter products based on search text
   const filteredProducts = products.filter(
@@ -222,12 +133,14 @@ const Products = ({ sidebarVisible }) => {
   // Show modal for adding/editing product
   const showModal = (product = null) => {
     setSelectedProduct(product);
+   
     if (product) {
       form.setFieldsValue({
         name: product.name,
         category: product.category,
         costPrice: product.costPrice,
         sellingPrice: product.sellingPrice,
+        supplierId: product.supplier.id,
       });
     } else {
       form.resetFields();
@@ -242,29 +155,39 @@ const Products = ({ sidebarVisible }) => {
   };
 
   // Handle form submission
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     if (selectedProduct) {
       // Update existing product
+      const res = await updateProduct(
+        values,
+        selectedProduct.id,
+        token
+      );
+      if (!res.success) {
+        message.error("เกิดข้อผิดพลาดในการอัพเดตสินค้า");
+        return;
+      }
       const updatedProducts = products.map((p) =>
         p.id === selectedProduct.id
           ? {
-              ...p,
-              ...values,
-              updatedAt: new Date().toISOString().split("T")[0],
-            }
+            ...p,
+            ...values,
+            updatedAt: new Date().toISOString().split("T")[0],
+          }
           : p
       );
       setProducts(updatedProducts);
       message.success("อัพเดตข้อมูลสินค้าเรียบร้อยแล้ว");
     } else {
       // Create new product
-      const newProduct = {
-        id: (products.length + 1).toString(),
-        ...values,
-        createdAt: new Date().toISOString().split("T")[0],
-        updatedAt: new Date().toISOString().split("T")[0],
-      };
-      setProducts([...products, newProduct]);
+      const res = await addProduct(values, token);
+      console.log(res)
+      if (!res.success) {
+        message.error("เกิดข้อผิดพลาดในการเพิ่มสินค้า");
+        return;
+      }
+      setProducts([...products, res.data]);
+      fetchProduct();
       message.success("เพิ่มสินค้าใหม่เรียบร้อยแล้ว");
     }
     setIsModalVisible(false);
@@ -277,8 +200,16 @@ const Products = ({ sidebarVisible }) => {
   };
 
   // Handle product deletion
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (productToDelete) {
+      const res = await deleteProduct(
+        productToDelete.id,
+        token
+      );
+      if (!res.success) {
+        message.error("เกิดข้อผิดพลาดในการลบสินค้า");
+        return;
+      }
       const updatedProducts = products.filter(
         (p) => p.id !== productToDelete.id
       );
@@ -302,6 +233,22 @@ const Products = ({ sidebarVisible }) => {
       dataIndex: "name",
       key: "name",
       ellipsis: true,
+    },
+    {
+      title: "ซัพพลายเออร์",
+      dataIndex: "supplier",
+      key: "supplier",
+      render: (supplirer) => (
+        <Text
+          style={{
+            fontWeight: "bold",
+            color: "#1890ff",
+            textDecoration: "underline",
+          }}
+        >
+          {supplirer? supplirer.name : '-'}
+        </Text>
+      ),
     },
     {
       title: "หมวดหมู่",
@@ -522,6 +469,24 @@ const Products = ({ sidebarVisible }) => {
                   <Option value="อุปกรณ์ตกแต่ง">อุปกรณ์ตกแต่ง</Option>
                   <Option value="อุปกรณ์ตกแต่งภายใน">อุปกรณ์ตกแต่งภายใน</Option>
                   <Option value="อื่นๆ">อื่นๆ</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="supplierId"
+                label="ซัพพลายเออร์" 
+                rules={[{ required: true, message: "กรุณาเลือกซัพพลายเออร์" }]}
+              >
+                <Select placeholder="เลือกหมวดหมู่">
+                  {suppliers.map((supplier) => (
+                    <Option key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>

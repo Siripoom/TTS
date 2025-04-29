@@ -12,13 +12,7 @@ export const getVehicles = async (req, res) => {
   try {
     const vehicles = await prisma.vehicle.findMany({
       include: {
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        Driver: true,
         TruckQueue: true,
         FuelCost: true,
         MaintenanceCost: true,
@@ -94,13 +88,15 @@ export const getVehicleById = async (req, res) => {
 export const createVehicle = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log("error")
     return res.status(400).json({
       success: false,
       errors: errors.array(),
     });
+    
   }
 
-  const { plateNumber, model, capacity, driverId } = req.body;
+  const { plateNumber, model, capacity, driverId , type } = req.body;
 
   try {
     // Check if vehicle with plateNumber already exists
@@ -136,6 +132,7 @@ export const createVehicle = async (req, res) => {
         plateNumber,
         model,
         capacity: capacity ? parseFloat(capacity) : null,
+        type,
         driverId,
       },
       include: {
@@ -178,11 +175,14 @@ export const updateVehicle = async (req, res) => {
   }
 
   try {
-    const { plateNumber, model, capacity, driverId } = req.body;
+    const { plateNumber, model, capacity, driverId , type } = req.body;
 
     // Check if vehicle exists
     const vehicleExists = await prisma.vehicle.findUnique({
       where: { id: req.params.id },
+      include: {
+        Driver: true,
+      }
     });
 
     if (!vehicleExists) {
@@ -191,6 +191,7 @@ export const updateVehicle = async (req, res) => {
         message: "Vehicle not found",
       });
     }
+  
 
     // If plateNumber is being changed, check it's not already in use
     if (plateNumber && plateNumber !== vehicleExists.plateNumber) {
@@ -206,18 +207,15 @@ export const updateVehicle = async (req, res) => {
       }
     }
 
-    // If driverId is provided, verify the driver exists
-    if (driverId) {
-      const driver = await prisma.user.findUnique({
+    const driverCheck = await prisma.driver.findUnique({ where: { id: vehicleExists.Driver[0].id } });
+    if (driverCheck.id !== vehicleExists.Driver.id ) {
+      await prisma.driver.update({
         where: { id: driverId },
-      });
-
-      if (!driver || driver.role !== "driver") {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid driver ID or user is not a driver",
-        });
-      }
+        data: {
+          ...driverCheck,
+          vehicleId: req.params.id,
+        },
+      })
     }
 
     // Prepare update data
@@ -225,7 +223,7 @@ export const updateVehicle = async (req, res) => {
     if (plateNumber) updateData.plateNumber = plateNumber;
     if (model !== undefined) updateData.model = model;
     if (capacity !== undefined) updateData.capacity = parseFloat(capacity);
-    if (driverId !== undefined) updateData.driverId = driverId;
+    if (type !== undefined) updateData.type = type;
 
     // Update vehicle
     const updatedVehicle = await prisma.vehicle.update({
@@ -234,13 +232,7 @@ export const updateVehicle = async (req, res) => {
       },
       data: updateData,
       include: {
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        Driver: true,
       },
     });
 

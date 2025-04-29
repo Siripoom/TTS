@@ -40,6 +40,50 @@ export const getUsers = async (req, res) => {
 };
 
 /**
+ * @desc    Get single driver by ID
+ * @route   GET /api/users/driver/
+ * @access  Private/Admin
+ */
+
+export const getDriver = async (req, res) => {
+  try {
+    const driver = await prisma.user.findMany
+    ({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+        DriverDetails: true,
+        Vehicle: true
+        
+      },
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        message: "Driver not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: driver,
+    });
+  } catch (error) {
+    console.error("Error fetching driver:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch driver",
+      error: error.message,
+    });
+  }
+}
+
+/**
  * @desc    Get single user by ID
  * @route   GET /api/users/:id
  * @access  Private/Admin
@@ -86,6 +130,7 @@ export const getUserById = async (req, res) => {
     });
   }
 };
+
 
 /**
  * @desc    Create a new user
@@ -155,6 +200,44 @@ export const createUser = async (req, res) => {
   }
 };
 
+export const createDriver = async (req, res) => {
+  const  { name, licenseNo , phone ,licenseType , licenseExpire ,brithDate , workStart, assignedVehicleId , address} = req.body;
+  try {
+
+    const createUser = await prisma.user.create({
+      data: {
+        name,
+        role: "driver", // Default role from schema
+        DriverDetails: {
+          create: {
+            licenseNo,
+            phone,
+            licenseType,
+            brithDate,
+            workStart,
+            vehicleId:assignedVehicleId,
+            address
+          }
+        },
+        email: '' ,
+        password: '',
+      },
+    });
+    return res.status(201).json({
+      success: true,
+      data: createUser,
+    });
+  } catch (error) {
+    console.error("Error creating driver:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create driver",
+      error: error.message,
+    });
+    
+  }
+}
+
 /**
  * @desc    Update user
  * @route   PUT /api/users/:id
@@ -222,6 +305,44 @@ export const updateUser = async (req, res) => {
     });
   }
 };
+
+export const updateDriver = async (req, res) => {
+  const { name, licenseNo , phone ,licenseType , licenseExpire ,brithDate , workStart, vehicleId , address} = req.body;
+  try {
+    const updateUser = await prisma.user.update({
+      where: {
+        id: req.params.id,
+      },
+      data: {
+        name,
+        DriverDetails: {
+          update: {
+            licenseNo,
+            phone,
+            licenseType,
+            licenseExpire,
+            brithDate,
+            workStart,
+            vehicleId,
+            address
+          }
+        }
+      },
+    });
+    return res.status(201).json({
+      success: true,
+      data: updateUser,
+    });
+  } catch (error) {
+    console.error("Error updating driver:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update driver",
+      error: error.message,
+    });
+    
+  }
+}
 
 /**
  * @desc    Delete user

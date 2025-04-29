@@ -8,6 +8,7 @@ import Trucks from "./Truck/Trucks";
 
 import "./User.css";
 import PropTypes from "prop-types";
+import { getDrivers, getUser, getVehicles } from "../../services/api";
 
 const { TabPane } = Tabs;
 
@@ -16,19 +17,52 @@ const UserAndTruck = ({ sidebarVisible, toggleSidebar }) => {
   const [searchText, setSearchText] = useState("");
   const [drivers, setDrivers] = useState([]);
   const [trucks, setTrucks] = useState([]);
-
+  const token = localStorage.getItem("token");
   // Fetch drivers and trucks data from your API or backend
   useEffect(() => {
+    
     // Example: Fetch data for drivers and trucks from an API
     const fetchData = async () => {
       try {
-        const driversResponse = await fetch("/api/drivers"); // Replace with actual API
-        const driversData = await driversResponse.json();
-        setDrivers(driversData);
+        const res = await getDrivers(token); // Replace with actual API
+        console.log("driversRes : ", res)
+        let dataSorce = []
+        res?.data.forEach((driver) => {
+          let data = {
+            id: driver.id,
+            name: driver.name,
+            address: driver.address,
+            birthDay: driver.birthDay,
+            licenseExpire: driver.licenseExpire,
+            licenseNo: driver.licenseNo,
+            phone: driver.phone,
+            licenseType: driver.licenseType,
+            workStart: driver.workStart,
+            assignedVehicle: driver.vehicle || [],
+          }
+          dataSorce.push(data)
+          console.log("Vehicle " , driver.vehicle)
+        })
+        console.log("dataSorceDriver : ", dataSorce)
 
-        const trucksResponse = await fetch("/api/trucks"); // Replace with actual API
-        const trucksData = await trucksResponse.json();
-        setTrucks(trucksData);
+
+        const resVehicles = await getVehicles(token); // Replace with actual API
+        let dataSorceVehicle = []
+
+        resVehicles.data.forEach((vehicle) => {
+          let data = {
+            id: vehicle.id,
+            plateNumber: vehicle.plateNumber,
+            model: vehicle.model,
+            capacity: vehicle.capacity,
+            type: vehicle.type,
+            assignedDriver: vehicle.Driver[0] || [],
+          }
+          dataSorceVehicle.push(data)
+        })
+        console.log("dataSorceVehicle", dataSorceVehicle)
+        setDrivers(dataSorce);
+        setTrucks(dataSorceVehicle);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

@@ -15,6 +15,7 @@ import driverPaymentRoutes from "./routes/driverPaymentRoutes.js";
 import advanceAndFineRoutes from "./routes/advanceAndFineRoutes.js";
 import overnightBonusRoutes from "./routes/overnightBonusRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import driverRoutes from "./routes/driverRouter.js"; // นำเข้า driverRoutes
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/driver", driverRoutes);
 app.use("/api/truck-queues", truckQueueRoutes);
 app.use("/api/maintenances", maintenanceRoutes);
 app.use("/api/fuel", fuelRoutes);

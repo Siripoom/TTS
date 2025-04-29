@@ -49,9 +49,8 @@ function App() {
   return (
     <BrowserRouter>
       <div
-        className={`app-container ${
-          sidebarVisible ? "sidebar-open" : "sidebar-closed"
-        }`}
+        className={`app-container ${sidebarVisible ? "sidebar-open" : "sidebar-closed"
+          }`}
       >
         <Routes>
           {/* Public Routes */}
@@ -122,15 +121,15 @@ function App() {
               />
             }
           />
-          {/*<Route
+          <Route
             path="/admin/reports"
-            element={
-              <Reports
-                sidebarVisible={sidebarVisible}
-                toggleSidebar={toggleSidebar}
-              />
-            }
-          />  */}
+            // element={
+            //   <Reports
+            //     sidebarVisible={sidebarVisible}
+            //     toggleSidebar={toggleSidebar}
+            //   />
+            // }
+          />
         </Routes>
       </div>
     </BrowserRouter>
