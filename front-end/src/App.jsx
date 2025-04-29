@@ -12,6 +12,7 @@ import Customers from "./pages/Customers/Customer";
 import Suppliers from "./pages/Suppliers/Supplier";
 import TruckQueues from "./pages/TruckQueus/TruckQueus";
 import UserAndTruck from "./pages/UserAndTruck/UserAndTruck";
+import Report from "./pages/Reports/Report";
 import Costs from "./pages/Cost/Costs";
 
 import Finance from "./pages/Accounts/Account";
@@ -49,8 +50,9 @@ function App() {
   return (
     <BrowserRouter>
       <div
-        className={`app-container ${sidebarVisible ? "sidebar-open" : "sidebar-closed"
-          }`}
+        className={`app-container ${
+          sidebarVisible ? "sidebar-open" : "sidebar-closed"
+        }`}
       >
         <Routes>
           {/* Public Routes */}
@@ -123,12 +125,12 @@ function App() {
           />
           <Route
             path="/admin/reports"
-            // element={
-            //   <Reports
-            //     sidebarVisible={sidebarVisible}
-            //     toggleSidebar={toggleSidebar}
-            //   />
-            // }
+            element={
+              <Report
+                sidebarVisible={sidebarVisible}
+                toggleSidebar={toggleSidebar}
+              />
+            }
           />
         </Routes>
       </div>
