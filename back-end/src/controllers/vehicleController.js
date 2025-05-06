@@ -86,17 +86,8 @@ export const getVehicleById = async (req, res) => {
  * @access  Private/Admin
  */
 export const createVehicle = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log("error")
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-    
-  }
 
-  const { plateNumber, model, capacity, driverId , type } = req.body;
+  const { plateNumber, model, capacity, driverId, type } = req.body;
 
   try {
     // Check if vehicle with plateNumber already exists
@@ -113,38 +104,41 @@ export const createVehicle = async (req, res) => {
       });
     }
 
-    // If driverId is provided, verify the driver exists
-    if (driverId) {
-      const driver = await prisma.user.findUnique({
-        where: { id: driverId },
-      });
-
-      if (!driver || driver.role !== "driver") {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid driver ID or user is not a driver",
-        });
-      }
-    }
-
     const vehicle = await prisma.vehicle.create({
       data: {
         plateNumber,
         model,
         capacity: capacity ? parseFloat(capacity) : null,
         type,
-        driverId,
       },
       include: {
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        Driver: true
       },
     });
+
+    console.log(vehicle)
+    console.log(driverId)
+    if (!vehicle) {
+      return res.status(400).json({
+        success: false,
+        message: "Failed to create vehicle",
+      });
+    }
+
+    if (driverId != null && driverId != "" && driverId != undefined) {
+      const updateDriver = await prisma.driver.update({
+        where: { id: driverId },
+        data: {
+          vehicleId: vehicle.id,
+        },
+      })
+      if (!updateDriver) {
+        return res.status(400).json({
+          success: false,
+          message: "Driver not found",
+        });
+      }
+    }
 
     res.status(201).json({
       success: true,
@@ -166,16 +160,8 @@ export const createVehicle = async (req, res) => {
  * @access  Private/Admin
  */
 export const updateVehicle = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
-
   try {
-    const { plateNumber, model, capacity, driverId , type } = req.body;
+    const { plateNumber, model, capacity, driverId, type } = req.body;
 
     // Check if vehicle exists
     const vehicleExists = await prisma.vehicle.findUnique({
@@ -191,7 +177,7 @@ export const updateVehicle = async (req, res) => {
         message: "Vehicle not found",
       });
     }
-  
+
 
     // If plateNumber is being changed, check it's not already in use
     if (plateNumber && plateNumber !== vehicleExists.plateNumber) {
@@ -207,15 +193,48 @@ export const updateVehicle = async (req, res) => {
       }
     }
 
-    const driverCheck = await prisma.driver.findUnique({ where: { id: vehicleExists.Driver[0].id } });
-    if (driverCheck.id !== vehicleExists.Driver.id ) {
-      await prisma.driver.update({
+    if (vehicleExists.Driver.length === 0) {
+      const updateNewDriver = await prisma.driver.update({
         where: { id: driverId },
         data: {
-          ...driverCheck,
           vehicleId: req.params.id,
         },
       })
+      if (!updateNewDriver) {
+        return res.status(400).json({
+          success: false,
+          message: "Driver not found",
+        });
+      }
+    } else {
+
+      if (vehicleExists.Driver[0].id !== driverId) {
+        console.log("Driver ID does not match")
+        const updateNewDriver = await prisma.driver.update({
+          where: { id: driverId },
+          data: {
+            vehicleId: req.params.id,
+          },
+        })
+        console.log("updateNewDriver", updateNewDriver)
+        if (!updateNewDriver) {
+          return res.status(400).json({
+            success: false,
+            message: "Driver not found",
+          });
+        }
+        if (vehicleExists.Driver[0].id !== null) {
+          // Remove vehicleId from the old driver
+          const updateOldDriver = await prisma.driver.update({
+            where: { id: vehicleExists.Driver[0].id },
+            data: {
+              vehicleId: null,
+            },
+          })
+        }
+      }
+
+
     }
 
     // Prepare update data

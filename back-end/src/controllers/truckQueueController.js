@@ -12,34 +12,10 @@ export const getTruckQueues = async (req, res) => {
   try {
     const queues = await prisma.truckQueue.findMany({
       include: {
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            contactInfo: true,
-          },
-        },
-        vehicle: {
-          select: {
-            id: true,
-            plateNumber: true,
-            model: true,
-          },
-        },
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        supplier: {
-          select: {
-            id: true,
-            name: true,
-            contactInfo: true,
-          },
-        },
+        customer: true,
+        vehicle:true,
+        driver: true,
+        supplier:true
       },
       orderBy: {
         createdAt: "desc",
@@ -115,13 +91,15 @@ export const getTruckQueueById = async (req, res) => {
  * @access  Private/Admin
  */
 export const createTruckQueue = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
+  // const errors = validationResult(req);
+  // if (!errors.isEmpty()) {
+  //   console.log("Validation errors:", errors.array());
+  //   return res.status(400).json({
+  //     success: false,
+  //     errors: errors.array(),
+
+  //   });
+  // }
 
   const {
     customerId,
@@ -140,7 +118,7 @@ export const createTruckQueue = async (req, res) => {
       vehicleId
         ? prisma.vehicle.findUnique({ where: { id: vehicleId } })
         : true,
-      driverId ? prisma.user.findUnique({ where: { id: driverId } }) : true,
+      driverId ? prisma.driver.findUnique({ where: { id: driverId } }) : true,
       prisma.supplier.findUnique({ where: { id: supplierId } }),
     ]);
 
@@ -187,13 +165,7 @@ export const createTruckQueue = async (req, res) => {
       include: {
         customer: true,
         vehicle: true,
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        driver: true,
         supplier: true,
       },
     });

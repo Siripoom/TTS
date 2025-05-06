@@ -322,6 +322,7 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
             <Col span={8}>
               <Form.Item name="assignedDriverId" label="คนขับประจำ">
                 <Select allowClear placeholder="เลือกคนขับประจำ">
+                  <Option value={null}>ไม่มีคนขับประจำ</Option>
                   {drivers.map((driver) => (
                     <Option key={driver.id} value={driver.id}>
                       {driver.name}

@@ -16,6 +16,9 @@ import advanceAndFineRoutes from "./routes/advanceAndFineRoutes.js";
 import overnightBonusRoutes from "./routes/overnightBonusRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import driverRoutes from "./routes/driverRouter.js"; // นำเข้า driverRoutes
+import costRoutes from "./routes/constRoutes.js"; // นำเข้า costRoutes
+import invoiceCustomerItemRoutes from "./routes/invoiceCustomerItemRoutes.js"; // นำเข้า invoiceCustomerItem
+import invoiceSupplierRoutes from "./routes/invoiceSupplierRoutes.js"; // นำเข้า invoiceSupplierRoutes
 
 dotenv.config();
 
@@ -34,7 +37,9 @@ app.use("/api/driver", driverRoutes);
 app.use("/api/truck-queues", truckQueueRoutes);
 app.use("/api/maintenances", maintenanceRoutes);
 app.use("/api/fuel", fuelRoutes);
-app.use("/api/invoices", invoiceRoutes);
+app.use("/api/costs", costRoutes); // ใช้ costRoutes
+app.use("/api/invoices-customer", invoiceCustomerItemRoutes);
+app.use("/api/invoices-supplier", invoiceSupplierRoutes);
 app.use("/api/driver-payments", driverPaymentRoutes);
 app.use("/api", advanceAndFineRoutes);
 app.use("/api", overnightBonusRoutes);

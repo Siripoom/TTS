@@ -17,7 +17,7 @@ export const getAllMaintenance = async (req, res) => {
             id: true,
             plateNumber: true,
             model: true,
-            driver: {
+            Driver: {
               select: {
                 id: true,
                 name: true,
@@ -63,7 +63,7 @@ export const getMaintenanceById = async (req, res) => {
             id: true,
             plateNumber: true,
             model: true,
-            driver: {
+            D: {
               select: {
                 id: true,
                 name: true,
@@ -112,10 +112,11 @@ export const createMaintenance = async (req, res) => {
   const {
     vehicleId,
     maintenanceDate,
+    maintenanceType,
     itemName,
     quantity,
     cost,
-    greaseDate,
+    technician,
     mileage,
     remark,
   } = req.body;
@@ -137,12 +138,15 @@ export const createMaintenance = async (req, res) => {
       data: {
         vehicleId,
         maintenanceDate: new Date(maintenanceDate),
+        maintenanceType,
         itemName,
         quantity: quantity ? parseInt(quantity) : null,
         cost: cost ? parseFloat(cost) : null,
-        greaseDate: greaseDate ? new Date(greaseDate) : null,
         mileage,
         remark,
+        status: "pending", // Default status
+        technician,
+
       },
       include: {
         vehicle: {
@@ -184,12 +188,15 @@ export const updateMaintenance = async (req, res) => {
 
   try {
     const {
+      vehicleId,
       maintenanceDate,
+      maintenanceType,
       itemName,
       quantity,
       cost,
-      greaseDate,
+      technician,
       mileage,
+      status,
       remark,
     } = req.body;
 
@@ -207,13 +214,15 @@ export const updateMaintenance = async (req, res) => {
 
     // Prepare update data
     const updateData = {};
+    if (vehicleId)  updateData.vehicleId = vehicleId;
+    if (maintenanceType) updateData.maintenanceType = maintenanceType;
+    if (technician) updateData.technician = technician;
     if (maintenanceDate) updateData.maintenanceDate = new Date(maintenanceDate);
     if (itemName !== undefined) updateData.itemName = itemName;
     if (quantity !== undefined)
       updateData.quantity = quantity ? parseInt(quantity) : null;
+    if (status !== undefined) updateData.status = status;
     if (cost !== undefined) updateData.cost = cost ? parseFloat(cost) : null;
-    if (greaseDate !== undefined)
-      updateData.greaseDate = greaseDate ? new Date(greaseDate) : null;
     if (mileage !== undefined) updateData.mileage = mileage;
     if (remark !== undefined) updateData.remark = remark;
 

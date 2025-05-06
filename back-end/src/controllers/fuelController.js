@@ -12,19 +12,8 @@ export const getAllFuelCosts = async (req, res) => {
   try {
     const fuelCosts = await prisma.fuelCost.findMany({
       include: {
-        vehicle: {
-          select: {
-            id: true,
-            plateNumber: true,
-            model: true,
-            driver: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
+        vehicle: true,
+        driver: true,
       },
       orderBy: {
         date: "desc",
@@ -109,7 +98,7 @@ export const createFuelCost = async (req, res) => {
     });
   }
 
-  const { vehicleId, fuelStation, cost, date } = req.body;
+  const { vehicleId,driverId, fuelType,liters,pricePerLiter, fuelStation, cost, date } = req.body;
 
   try {
     // Check if vehicle exists
@@ -128,16 +117,16 @@ export const createFuelCost = async (req, res) => {
       data: {
         vehicleId,
         fuelStation,
+        driverId,
+        fuelType,
+        liters,
+        pricePerLiter,
         cost: parseFloat(cost),
         date: date ? new Date(date) : new Date(),
       },
       include: {
-        vehicle: {
-          select: {
-            plateNumber: true,
-            model: true,
-          },
-        },
+        vehicle: true,
+        driver: true,
       },
     });
 
@@ -162,6 +151,7 @@ export const createFuelCost = async (req, res) => {
  */
 export const updateFuelCost = async (req, res) => {
   const errors = validationResult(req);
+  console.log(errors);
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
@@ -170,7 +160,7 @@ export const updateFuelCost = async (req, res) => {
   }
 
   try {
-    const { fuelStation, cost, date } = req.body;
+    const { vehicleId,driverId, fuelType,liters,pricePerLiter, fuelStation, cost, date } = req.body;
 
     // Check if fuel cost record exists
     const fuelCostExists = await prisma.fuelCost.findUnique({
@@ -189,6 +179,11 @@ export const updateFuelCost = async (req, res) => {
     if (fuelStation !== undefined) updateData.fuelStation = fuelStation;
     if (cost !== undefined) updateData.cost = parseFloat(cost);
     if (date) updateData.date = new Date(date);
+    if (vehicleId) { updateData.vehicleId = vehicleId; }
+    if (driverId) { updateData.driverId = driverId; }
+    if (fuelType) { updateData.fuelType = fuelType; }
+    if (liters) { updateData.liters = liters; }
+    if (pricePerLiter) { updateData.pricePerLiter = parseFloat(pricePerLiter); }
 
     const updatedFuelCost = await prisma.fuelCost.update({
       where: {

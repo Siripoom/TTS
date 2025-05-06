@@ -35,6 +35,8 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
 import "./Costs.css";
 import PropTypes from "prop-types";
+import { addMaintenance, getMaintenance, getVehicles, updateMaintenance } from "../../services/api";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -48,6 +50,7 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [recordToDelete, setRecordToDelete] = useState(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [vehicles, setVehicles] = useState([]);
   const [form] = Form.useForm();
   const [stats, setStats] = useState({
     totalRecords: 0,
@@ -57,131 +60,16 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
     maintenanceTypes: [],
   });
   const [activeTabKey, setActiveTabKey] = useState("all");
-
   const pageSize = 10;
+  const token = localStorage.getItem("token");
 
-  // Load mock data
-  useEffect(() => {
-    const mockMaintenanceRecords = [
-      {
-        id: "1",
-        vehicleId: "1",
-        vehiclePlate: "กข-1234",
-        maintenanceDate: "2025-04-10",
-        maintenanceType: "เปลี่ยนถ่ายน้ำมันเครื่อง",
-        itemName: "น้ำมันเครื่อง Premium",
-        quantity: 5,
-        cost: 2500,
-        mileage: "45600 กม.",
-        mechanic: "อู่ช่างเอก",
-        remark: "เปลี่ยนตามกำหนดการบำรุงรักษา",
-        status: "completed",
-      },
-      {
-        id: "2",
-        vehicleId: "2",
-        vehiclePlate: "ขค-5678",
-        maintenanceDate: "2025-04-05",
-        maintenanceType: "ซ่อมระบบเบรก",
-        itemName: "ผ้าเบรกหน้า-หลัง",
-        quantity: 1,
-        cost: 3500,
-        mileage: "32400 กม.",
-        mechanic: "ศูนย์บริการ HINO",
-        remark: "เปลี่ยนเนื่องจากผ้าเบรกหมดอายุการใช้งาน",
-        status: "completed",
-      },
-      {
-        id: "3",
-        vehicleId: "3",
-        vehiclePlate: "คง-9012",
-        maintenanceDate: "2025-04-03",
-        maintenanceType: "ซ่อมระบบช่วงล่าง",
-        itemName: "โช้คอัพหน้า",
-        quantity: 2,
-        cost: 8500,
-        mileage: "78500 กม.",
-        mechanic: "ศูนย์บริการ FUSO",
-        remark: "เปลี่ยนเนื่องจากโช้คอัพรั่ว",
-        status: "completed",
-      },
-      {
-        id: "4",
-        vehicleId: "1",
-        vehiclePlate: "กข-1234",
-        maintenanceDate: "2025-03-15",
-        maintenanceType: "เปลี่ยนยาง",
-        itemName: "ยางรถยนต์ Bridgestone",
-        quantity: 6,
-        cost: 24000,
-        mileage: "44000 กม.",
-        mechanic: "ร้านยางดำรง",
-        remark: "เปลี่ยนยางครบทุกเส้น",
-        status: "completed",
-      },
-      {
-        id: "5",
-        vehicleId: "4",
-        vehiclePlate: "งจ-3456",
-        maintenanceDate: "2025-03-10",
-        maintenanceType: "ตรวจเช็คระบบไฟฟ้า",
-        itemName: "แบตเตอรี่",
-        quantity: 1,
-        cost: 4500,
-        mileage: "21300 กม.",
-        mechanic: "ร้านไดนาโม",
-        remark: "เปลี่ยนแบตเตอรี่เนื่องจากแบตเสื่อม",
-        status: "completed",
-      },
-      {
-        id: "6",
-        vehicleId: "2",
-        vehiclePlate: "ขค-5678",
-        maintenanceDate: "2025-03-05",
-        maintenanceType: "เปลี่ยนไส้กรอง",
-        itemName: "ไส้กรองอากาศ",
-        quantity: 1,
-        cost: 650,
-        mileage: "31000 กม.",
-        mechanic: "อู่ช่างเอก",
-        remark: "เปลี่ยนตามกำหนดการบำรุงรักษา",
-        status: "completed",
-      },
-      {
-        id: "7",
-        vehicleId: "5",
-        vehiclePlate: "จฉ-7890",
-        maintenanceDate: "2025-04-15",
-        maintenanceType: "เปลี่ยนถ่ายน้ำมันเครื่อง",
-        itemName: "น้ำมันเครื่อง Premium",
-        quantity: 5,
-        cost: 2500,
-        mileage: "38700 กม.",
-        mechanic: "อู่ช่างเอก",
-        remark: "กำหนดการบำรุงรักษา",
-        status: "pending",
-      },
-      {
-        id: "8",
-        vehicleId: "3",
-        vehiclePlate: "คง-9012",
-        maintenanceDate: "2025-04-20",
-        maintenanceType: "ตรวจเช็คทั่วไป",
-        itemName: "ค่าบริการตรวจเช็ค",
-        quantity: 1,
-        cost: 1200,
-        mileage: "80000 กม.",
-        mechanic: "ศูนย์บริการ FUSO",
-        remark: "ตรวจเช็คสภาพทั่วไป",
-        status: "pending",
-      },
-    ];
-
-    setMaintenanceRecords(mockMaintenanceRecords);
+  const fetchMaintenanceCost = async () => {
+    const res = await getMaintenance(token);
+    setMaintenanceRecords(res.data);
 
     // Calculate statistics
-    const totalRecords = mockMaintenanceRecords.length;
-    const completedRecords = mockMaintenanceRecords.filter(
+    const totalRecords = res.data.length;
+    const completedRecords = res.data.filter(
       (record) => record.status === "completed"
     );
     const totalCost = completedRecords.reduce(
@@ -194,14 +82,14 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
     // Group by vehicle
     const vehicleMap = {};
     completedRecords.forEach((record) => {
-      if (!vehicleMap[record.vehiclePlate]) {
-        vehicleMap[record.vehiclePlate] = {
+      if (!vehicleMap[record.vehicle.plateNumber]) {
+        vehicleMap[record.vehicle.plateNumber] = {
           count: 0,
           totalCost: 0,
         };
       }
-      vehicleMap[record.vehiclePlate].count += 1;
-      vehicleMap[record.vehiclePlate].totalCost += record.cost;
+      vehicleMap[record.vehicle.plateNumber].count += 1;
+      vehicleMap[record.vehicle.plateNumber].totalCost += record.cost;
     });
 
     const vehicles = Object.keys(vehicleMap).map((plate) => ({
@@ -237,12 +125,22 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
       vehicles,
       maintenanceTypes,
     });
+  }
+
+  const fetchVehicle = async () => {
+    const res = await getVehicles(token);
+    setVehicles(res.data);
+  }
+  // Load mock data
+  useEffect(() => {
+    fetchMaintenanceCost();
+    fetchVehicle();
   }, []);
 
   // Filter records based on search text and tab
   const filteredRecords = maintenanceRecords.filter((record) => {
     const matchesSearch =
-      record.vehiclePlate.toLowerCase().includes(searchText.toLowerCase()) ||
+      record.vehicle.plateNumber.toLowerCase().includes(searchText.toLowerCase()) ||
       record.maintenanceType.toLowerCase().includes(searchText.toLowerCase()) ||
       record.itemName.toLowerCase().includes(searchText.toLowerCase());
 
@@ -262,14 +160,14 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
     setSelectedRecord(record);
     if (record) {
       form.setFieldsValue({
-        vehiclePlate: record.vehiclePlate,
-        maintenanceDate: record.maintenanceDate,
+        vehicleId: record.vehicle.id,
+        maintenanceDate: dayjs(record.maintenanceDate).format("YYYY-MM-DD"),
         maintenanceType: record.maintenanceType,
         itemName: record.itemName,
         quantity: record.quantity,
         cost: record.cost,
         mileage: record.mileage,
-        mechanic: record.mechanic,
+        technician: record.technician,
         remark: record.remark,
         status: record.status,
       });
@@ -291,9 +189,14 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
   };
 
   // Handle form submission
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     if (selectedRecord) {
       // Update existing record
+      const res = await updateMaintenance(values, selectedRecord.id, token);
+      if (!res.success) {
+        message.error("เกิดข้อผิดพลาดในการอัพเดตข้อมูลซ่อมบำรุง");
+        return;
+      } 
       const updatedRecords = maintenanceRecords.map((record) =>
         record.id === selectedRecord.id
           ? {
@@ -306,6 +209,11 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
       message.success("อัพเดตข้อมูลซ่อมบำรุงเรียบร้อยแล้ว");
     } else {
       // Create new record
+      const res = await addMaintenance(values, token);
+      if (!res.success) {
+        message.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูลซ่อมบำรุง");
+        return;
+      }
       const newRecord = {
         id: (maintenanceRecords.length + 1).toString(),
         vehicleId: Math.floor(Math.random() * 5) + 1, // Mock vehicleId
@@ -315,6 +223,7 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
       message.success("เพิ่มข้อมูลซ่อมบำรุงเรียบร้อยแล้ว");
     }
     setIsModalVisible(false);
+    fetchMaintenanceCost();
   };
 
   // Show delete confirmation dialog
@@ -342,13 +251,15 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
       title: "วันที่",
       dataIndex: "maintenanceDate",
       key: "maintenanceDate",
+      ellipsis : true,
       sorter: (a, b) =>
         new Date(a.maintenanceDate) - new Date(b.maintenanceDate),
     },
     {
       title: "ทะเบียนรถ",
-      dataIndex: "vehiclePlate",
-      key: "vehiclePlate",
+      dataIndex: "vehicle",
+      key: "vehicle",
+      render: (vehicle) => vehicle.plateNumber || "-"
     },
     {
       title: "ประเภทการซ่อม",
@@ -603,16 +514,16 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="vehiclePlate"
+                name="vehicleId"
                 label="ทะเบียนรถ"
                 rules={[{ required: true, message: "กรุณาเลือกทะเบียนรถ" }]}
               >
                 <Select placeholder="เลือกทะเบียนรถ">
-                  <Option value="กข-1234">กข-1234</Option>
-                  <Option value="ขค-5678">ขค-5678</Option>
-                  <Option value="คง-9012">คง-9012</Option>
-                  <Option value="งจ-3456">งจ-3456</Option>
-                  <Option value="จฉ-7890">จฉ-7890</Option>
+                  {vehicles.map((vehicle) => (
+                    <Option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.plateNumber} ({vehicle.model})
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -714,7 +625,7 @@ const MaintenanceCost = ({ sidebarVisible, toggleSidebar }) => {
 
           <Row gutter={16}>
             <Col span={24}>
-              <Form.Item name="mechanic" label="ช่าง/อู่/ศูนย์บริการ">
+              <Form.Item name="technician" label="ช่าง/อู่/ศูนย์บริการ">
                 <Input placeholder="ช่าง/อู่/ศูนย์บริการ" />
               </Form.Item>
             </Col>
