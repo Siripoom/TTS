@@ -1,17 +1,18 @@
 import express from 'express';
-import { getInvoiceSupplier, getInvoiceSupplierById , createInvoiceSupplier, updateInvoiceSupplier, deleteInvoiceSupplier } from '../controllers/invoiceSupplier.js';
+import {} from '../controllers/invoiceSupplierController.js';
+import { createInvoiceCustomerItem, deleteInvoiceCustomerItem, getInvoiceCustomerItem, getInvoiceCustomerItemById, updateInvoiceCustomerItem } from '../controllers/invoiceCustomerItemController.js';
 
 const router = express.Router();
 
 // Get all invoice suppliers
-router.get('/', getInvoiceSupplier);
+router.get('/', getInvoiceCustomerItem);
 // Create a new invoice supplier
-router.post('/', createInvoiceSupplier);
+router.post('/', createInvoiceCustomerItem);
 // Update an existing invoice supplier
-router.put('/:id', updateInvoiceSupplier);
+router.put('/:id', updateInvoiceCustomerItem);
 // Delete an invoice supplier
-router.delete('/:id', deleteInvoiceSupplier);
+router.delete('/:id', deleteInvoiceCustomerItem);
 // Get an invoice supplier by ID
-router.get('/:id', getInvoiceSupplierById);
+router.get('/:id', getInvoiceCustomerItemById);
 
 export default router;

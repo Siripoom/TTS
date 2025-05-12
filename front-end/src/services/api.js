@@ -603,7 +603,7 @@ export const deleteCost = async (id, token) => {
 export const getInvoiceSupplier = async (token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.get("/invoice-supplier");
+        const response = await api.get("/invoices-supplier");
         return response.data;
     } catch (error) {
         console.log(error)
@@ -613,7 +613,7 @@ export const getInvoiceSupplier = async (token) => {
 export const getInvoiceSupplierById = async (id, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.get(`/invoice-supplier/${id}`);
+        const response = await api.get(`/invoices-supplier/${id}`);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -623,7 +623,7 @@ export const getInvoiceSupplierById = async (id, token) => {
 export const addInvoiceSupplier = async (data, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.post("/invoice-supplier", data);
+        const response = await api.post("/invoices-supplier", data);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -633,7 +633,7 @@ export const addInvoiceSupplier = async (data, token) => {
 export const updateInvoiceSupplier = async (data, id, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.put(`/invoice-supplier/${id}`, data);
+        const response = await api.put(`/invoices-supplier/${id}`, data);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -643,7 +643,7 @@ export const updateInvoiceSupplier = async (data, id, token) => {
 export const deleteInvoiceSupplier = async (id, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.delete(`/invoice-supplier/${id}`);
+        const response = await api.delete(`/invoices-supplier/${id}`);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -654,7 +654,7 @@ export const deleteInvoiceSupplier = async (id, token) => {
 export const getInvoiceCustomer = async (token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.get("/invoice-customer");
+        const response = await api.get("/invoices-customer");
         return response.data;
     } catch (error) {
         console.log(error)
@@ -664,7 +664,7 @@ export const getInvoiceCustomer = async (token) => {
 export const getInvoiceCustomerById = async (id, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.get(`/invoice-customer/${id}`);
+        const response = await api.get(`/invoices-customer/${id}`);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -674,7 +674,7 @@ export const getInvoiceCustomerById = async (id, token) => {
 export const addInvoiceCustomer = async (data, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.post("/invoice-customer", data);
+        const response = await api.post("/invoices-customer", data);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -684,7 +684,7 @@ export const addInvoiceCustomer = async (data, token) => {
 export const updateInvoiceCustomer = async (data, id, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.put(`/invoice-customer/${id}`, data);
+        const response = await api.put(`/invoices-customer/${id}`, data);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -694,7 +694,7 @@ export const updateInvoiceCustomer = async (data, id, token) => {
 export const deleteInvoiceCustomer = async (id, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.delete(`/invoice-customer/${id}`);
+        const response = await api.delete(`/invoices-customer/${id}`);
         return response.data;
     } catch (error) {
         console.log(error)

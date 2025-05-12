@@ -93,14 +93,14 @@ export const createInvoiceCustomerItem = async (req, res) => {
         InvoiceCustomer.map(async (item) => {
             const { productId, quantity, weight, price } = item;
             const amount = quantity * price;
-            const newInvoiceCustomerItem = await prisma.invoiceCustomerItem.create({
+            await prisma.invoiceCustomer.create({
                 data: {
                     productId,
                     quantity,
                     weight,
                     price,
                     amount,
-                    invoiceCustomerItemId: newInvoiceCustomerItem.id,
+                    invoiceId: newInvoiceCustomerItem.id,
                 },
             });
             if (!newInvoiceCustomerItem) {
@@ -187,9 +187,17 @@ export const deleteInvoiceCustomerItem = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // ลบข้อมูลใน InvoiceCustomer ก่อน
+        await prisma.invoiceCustomer.deleteMany({
+            where: {
+                invoiceId: id, // ใช้ id ของ InvoiceCustomerItem
+            },
+        });
+
+        // ลบข้อมูลใน InvoiceCustomerItem
         const deletedInvoiceCustomerItem = await prisma.invoiceCustomerItem.delete({
             where: {
-                id: parseInt(id),
+                id: id,
             },
         });
 
@@ -211,4 +219,4 @@ export const deleteInvoiceCustomerItem = async (req, res) => {
             message: "Server error",
         });
     }
-}
+};

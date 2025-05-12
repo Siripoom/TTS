@@ -1,5 +1,5 @@
 import express from 'express';
-import { getInvoiceSupplier, getInvoiceSupplierById , createInvoiceSupplier, updateInvoiceSupplier, deleteInvoiceSupplier } from '../controllers/invoiceSupplier.js';
+import { getInvoiceSupplier, getInvoiceSupplierById , createInvoiceSupplier, updateInvoiceSupplier, deleteInvoiceSupplier } from '../controllers/invoiceSupplierController.js';
 
 const router = express.Router();
 

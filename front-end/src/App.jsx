@@ -16,6 +16,7 @@ import Report from "./pages/Reports/Report";
 import Costs from "./pages/Cost/Costs";
 
 import Finance from "./pages/Accounts/Account";
+import InvoiceCustomerPDF from "./components/PDF/InvoiceCustomerPDF";
 // import Reports from "./pages/Reports/Reports";
 
 function App() {
@@ -130,6 +131,13 @@ function App() {
                 sidebarVisible={sidebarVisible}
                 toggleSidebar={toggleSidebar}
               />
+            }
+          />
+
+          <Route
+            path="/admin/pdf"
+            element={
+              <InvoiceCustomerPDF />
             }
           />
         </Routes>

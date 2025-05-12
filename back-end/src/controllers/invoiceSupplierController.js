@@ -6,12 +6,14 @@ export const getInvoiceSupplier = async (req, res) => {
     try {
         const invoiceSupplier = await prisma.invoiceSupplier.findMany({
             include: {
-                InvoiceSupplierItem: {
+                truckQueue: {
                     include: {
-                        supplier: true
+                        vehicle: true,
+                        driver: true
                     }
                 },
-                supplier: true
+                supplier: true,
+                product: true,
             },
         });
         res.status(200).json({
@@ -29,9 +31,9 @@ export const getInvoiceSupplier = async (req, res) => {
 
 export const createInvoiceSupplier = async (req, res) => {
     try {
-        const { supplierId,productId, cost , truckQueueId , dueDate , dateIn , dateOut , weightIn , weightOut } = req.body;
+        const { supplierId, productId, cost, truckQueueId, dueDate, dateIn, dateOut, weightIn, weightOut } = req.body;
 
-        const totalAmount = cost * (weightIn - weightOut);
+        const totalAmount = cost * (weightOut - weightIn);
 
         const newInvoiceSupplier = await prisma.invoiceSupplier.create({
             data: {
@@ -55,6 +57,12 @@ export const createInvoiceSupplier = async (req, res) => {
             });
         }
 
+        res.status(201).json({
+            success: true,
+            message: "create Data success",
+            data: newInvoiceSupplier
+        })
+
     } catch (error) {
         console.error("Error creating invoice supplier:", error);
         res.status(500).json({
@@ -68,13 +76,13 @@ export const createInvoiceSupplier = async (req, res) => {
 export const updateInvoiceSupplier = async (req, res) => {
     try {
         const { id } = req.params;
-        const { supplierId, productId, cost , truckQueueId , dueDate , dateIn , dateOut , weightIn , weightOut } = req.body;
+        const { supplierId, productId, cost, truckQueueId, dueDate, dateIn, dateOut, weightIn, weightOut } = req.body;
 
         const totalAmount = cost * (weightIn - weightOut);
 
         const updatedInvoiceSupplier = await prisma.invoiceSupplier.update({
             where: {
-                id: parseInt(id),
+                id: id,
             },
             data: {
                 supplierId,
@@ -117,7 +125,7 @@ export const deleteInvoiceSupplier = async (req, res) => {
 
         const deletedInvoiceSupplier = await prisma.invoiceSupplier.delete({
             where: {
-                id: parseInt(id),
+                id: id,
             },
         });
 
@@ -148,7 +156,7 @@ export const getInvoiceSupplierById = async (req, res) => {
 
         const invoiceSupplier = await prisma.invoiceSupplier.findUnique({
             where: {
-                id: parseInt(id),
+                id: id,
             },
             include: {
                 InvoiceSupplierItem: {

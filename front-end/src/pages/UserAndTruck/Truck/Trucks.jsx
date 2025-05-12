@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Card,
   Typography,
@@ -32,11 +32,13 @@ import {
   ToolOutlined,
   PhoneOutlined,
   UserOutlined,
+  PrinterFilled,
 } from "@ant-design/icons";
 
 import "../User.css";
 import PropTypes from "prop-types";
 import { addVehicle, deleteVehicle, updateVehicle } from "../../../services/api";
+import VehicleExportCSV from "../../../components/CSV/VehicleExportCSV";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -51,6 +53,7 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
   const [truckToDelete, setTruckToDelete] = useState(null);
   const [truckDetailVisible, setTruckDetailVisible] = useState(false);
   const [viewingTruck, setViewingTruck] = useState(null);
+  const csvRef = useRef();
   const pageSize = 5;
   const token = localStorage.getItem("token");
 
@@ -225,7 +228,7 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
   // Delete truck
   const handleDeleteTruck = async () => {
     if (truckToDelete) {
-      await deleteVehicle(truckToDelete.id, token); 
+      await deleteVehicle(truckToDelete.id, token);
       const updatedTrucks = trucks.filter(
         (truck) => truck.id !== truckToDelete.id
       );
@@ -255,6 +258,13 @@ const Trucks = ({ drivers, setTrucks, trucks, searchText, setSearchText }) => {
           >
             เพิ่มรถบรรทุก
           </Button>
+          <Button
+            onClick={() => csvRef.current.link.click()}
+            type="primary"
+            icon={<PrinterFilled />}
+          >Export to excel
+          </Button>
+          <VehicleExportCSV ref={csvRef} data={trucks} />
         </Space>
       </div>
 
