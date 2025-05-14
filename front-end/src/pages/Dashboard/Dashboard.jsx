@@ -22,13 +22,16 @@ import Header from "../../components/Header/Header";
 
 import "./Dashboard.css";
 import PropTypes from "prop-types";
-import { getUser } from "../../services/api";
+import { getDrivers, getFuelCosts, getInvoiceCustomer, getInvoiceSupplier, getMaintenance, getTruckQueues, getUser, getVehicles } from "../../services/api";
+import { render } from "@react-pdf/renderer";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
 const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [dataSource, setDataSource] = useState([
+  const token = localStorage.getItem("token")
+  const [driver, setDriver] = useState([
     {
       key: "1",
       name: "A",
@@ -36,30 +39,70 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
       date: "12/05/2568",
       time: "06:00",
     },
-    {
-      key: "2", 
-      name: "B",
-      phone: "092xxxxxxx",
-      date: "13/05/2568",
-      time: "18:00",
-    },
-    {
-      key: "3",
-      name: "C",
-      phone: "092xxxxxxx",
-      date: "15/05/2568",
-      time: "16:00",
-    },
   ]);
+  const [vehicle , setVehicle] = useState(null)
+  const [carBoken , setCarBoken] = useState(null);
+  const [totalCarBoken , setTotalCarBoken] = useState(0);
+  const [totalCustomer , setTotalCustomer] = useState(0);
+  const [invoiceCustomer , setInvoiceCustomer] = useState(null);
+  const [invoiceSupplier , setInvoiceSupplier] = useState(null);
+  const [truckQueue , setTruckQueue] = useState(null);
+  const [totalSupplier , setTotalSupplier] = useState();
+  const [fuelCost , setFuelCost] = useState();
 
   const findUserDriver = async () => {
-    const res = await getUser();
-    const userDriver = res.data.filter((user) => user.role === "driver");
-    setDataSource(userDriver);
+    const res = await getDrivers(token);
+    setDriver(res.data)
   }
+
+  const findVehicle = async () => {
+    const res = await getVehicles(token);
+    setVehicle(res.data)
+  }
+
+  const findMaintananceCost = async () => {
+    const res = await getMaintenance(token);
+    const total = res.data.reduce((sum , item) => sum + item.cost , 0)
+    setTotalCarBoken(total)
+    const boken = res.data.filter(item => item.status == 'pending')
+    setCarBoken(boken)
+  }
+
+  const findInvoiceCustomer = async () => {
+    const res = await getInvoiceCustomer(token);
+    setInvoiceCustomer(res.data);
+  
+    const total = res.data.reduce((sum, item) => sum + item.totalAmount, 0);
+    setTotalCustomer(total);
+  };
+
+  const findFuelCost = async () => {
+    const res = await getFuelCosts(token);
+    const cost = res.data.reduce((sum,item) => sum + item.cost , 0)
+    setFuelCost(cost)
+  }
+
+  const findInvoiceSupplier = async () => {
+    const res = await getInvoiceSupplier(token)
+    setInvoiceSupplier(res.data);
+    const total = res.data.reduce((sum,item) => sum + item.totalAmount , 0)
+    setTotalSupplier(total)
+  }
+
+  const findTruckQueue = async () => {
+    const res = await getTruckQueues(token);
+    setTruckQueue(res.data);
+  }
+  
 
   useEffect(() => {
     findUserDriver();
+    findVehicle();
+    findMaintananceCost();
+    findInvoiceCustomer();
+    findFuelCost();
+    findInvoiceSupplier();
+    findTruckQueue();
   }, []);
 
   const items = [
@@ -88,23 +131,28 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
   const columns = [
     {
       title: "ชื่อคนขับรถ",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "driver",
+      key: "driver",
+      render:(render) => render.name
+
     },
     {
       title: "เบอร์โทร",
-      dataIndex: "phone",
-      key: "phone",
+      dataIndex: "driver",
+      key: "driver",
+      render:(render) => render.phone
     },
     {
       title: "วันที่ขับ",
-      dataIndex: "date",
-      key: "date",
+      dataIndex: "dueDate",
+      key: "dueDate",
+      render:(date) => dayjs(date).format("DD/MM/YYYY")
     },
     {
       title: "จำนวนเที่ยว",
-      dataIndex: "time",
-      key: "time",
+      dataIndex: "dueDate",
+      key: "dueDate",
+      render:(date) => (<span>{ dayjs(date).format("HH:mm")} น.</span> )
     },
   ];
   const menuProps = {
@@ -126,32 +174,15 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                 <Title level={5} className="section-title">
                   ข้อมูล
                 </Title>
-                <Dropdown menu={menuProps}>
-                  <Button size="small" className="date-filter-btn">
-                    <Space>
-                      Today
-                      <DownOutlined />
-                    </Space>
-                  </Button>
-                </Dropdown>
               </div>
 
               <Row gutter={[16, 16]}>
-                <Col xs={24} sm={8} md={8}>
-                  <Card className="stat-card pink-card">
-                    <div className="stat-icon">
-                      <BarChartOutlined />
-                    </div>
-                    <div className="stat-value">$1k</div>
-                    <div className="stat-desc">ยอดส่ง</div>
-                  </Card>
-                </Col>
-                <Col xs={24} sm={8} md={8}>
+                <Col xs={24} sm={16} md={16}>
                   <Card className="stat-card yellow-card">
                     <div className="stat-icon">
                       <FileTextOutlined />
                     </div>
-                    <div className="stat-value">300</div>
+                    <div className="stat-value">{vehicle && vehicle.length}</div>
                     <div className="stat-desc">จำนวนรถ</div>
                   </Card>
                 </Col>
@@ -160,7 +191,7 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                     <div className="stat-icon">
                       <CheckCircleOutlined />
                     </div>
-                    <div className="stat-value">5</div>
+                    <div className="stat-value">{invoiceCustomer && invoiceCustomer.length}</div>
                     <div className="stat-desc">ส่งสำเร็จ</div>
                   </Card>
                 </Col>
@@ -176,14 +207,7 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                     <Title level={5} className="section-title">
                       ต้นทุนรถ
                     </Title>
-                    <Dropdown menu={menuProps}>
-                      <Button size="small" className="date-filter-btn">
-                        <Space>
-                          Today
-                          <DownOutlined />
-                        </Space>
-                      </Button>
-                    </Dropdown>
+
                   </div>
 
                   <Row gutter={[16, 16]}>
@@ -192,7 +216,7 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                         <div className="stat-icon">
                           <BarChartOutlined />
                         </div>
-                        <div className="stat-value">$1k</div>
+                        <div className="stat-value">{fuelCost && fuelCost} ฿ </div>
                         <div className="stat-desc">เชื้อเพลง</div>
                       </Card>
                     </Col>
@@ -201,7 +225,7 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                         <div className="stat-icon">
                           <FileTextOutlined />
                         </div>
-                        <div className="stat-value">300</div>
+                        <div className="stat-value">{totalCarBoken && totalCarBoken} ฿</div>
                         <div className="stat-desc">ค่าซ่อมบำรุง</div>
                       </Card>
                     </Col>
@@ -216,14 +240,7 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                     <Title level={5} className="section-title">
                       ยอดใบวางบิล
                     </Title>
-                    <Dropdown menu={menuProps}>
-                      <Button size="small" className="date-filter-btn">
-                        <Space>
-                          Today
-                          <DownOutlined />
-                        </Space>
-                      </Button>
-                    </Dropdown>
+
                   </div>
 
                   <Row gutter={[16, 16]}>
@@ -232,17 +249,17 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                         <div className="stat-icon">
                           <BarChartOutlined />
                         </div>
-                        <div className="stat-value">$1k</div>
-                        <div className="stat-desc">ยอดรวมใบวางบิล</div>
+                        <div className="stat-value">{totalCustomer && totalCustomer}฿</div>
+                        <div className="stat-desc">ยอด(ลูกค้า)</div>
                       </Card>
                     </Col>
                     <Col xs={24} sm={12}>
                       <Card className="stat-card yellow-card">
-                        <div className="stat-icon">
+                        <div className="stat-icon " >
                           <FileTextOutlined />
                         </div>
-                        <div className="stat-value">300</div>
-                        <div className="stat-desc">ใบที่ค้างชำระ</div>
+                        <div className="stat-value">{totalSupplier && totalSupplier}฿</div>
+                        <div className="stat-desc">ยอด(ซัพพลายเออร์)</div>
                       </Card>
                     </Col>
                   </Row>
@@ -253,21 +270,13 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
             <div className="dashboard-section">
               <div className="section-header">
                 <Title level={5}>รายการการเดินรถของหน่วยงานขับรถบรรทุก</Title>
-                <Dropdown menu={menuProps}>
-                  <Button size="small">
-                    <Space>
-                      Today
-                      <DownOutlined />
-                    </Space>
-                  </Button>
-                </Dropdown>
               </div>
 
               <Row gutter={[16, 16]}>
                 <Col xs={24} md={14}>
                   <Card className="table-card">
                     <Table
-                      dataSource={dataSource}
+                      dataSource={truckQueue}
                       columns={columns}
                       pagination={false}
                       size="middle"
@@ -297,7 +306,7 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                     <Col span={24}>
                       <Card className="stat-summary-card success-card">
                         <div className="stat-summary-content">
-                          <span className="stat-summary-value">45</span>
+                          <span className="stat-summary-value">{vehicle && vehicle.length}</span>
                           <div className="stat-summary-badge">รถ</div>
                         </div>
                         <div className="stat-summary-label">จำนวนรถทั้งหมด</div>
@@ -306,7 +315,7 @@ const Dashboard = ({ sidebarVisible, toggleSidebar }) => {
                     <Col span={24}>
                       <Card className="stat-summary-card failed-card">
                         <div className="stat-summary-content">
-                          <span className="stat-summary-value">02</span>
+                          <span className="stat-summary-value">{carBoken && carBoken.length}</span>
                           <div className="stat-summary-badge">รถ</div>
                         </div>
                         <div className="stat-summary-label">จำนวนเสียหาย</div>

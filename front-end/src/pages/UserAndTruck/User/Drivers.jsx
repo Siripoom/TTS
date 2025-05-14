@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   Typography,
@@ -33,11 +33,13 @@ import {
   CalendarOutlined,
   EnvironmentOutlined,
   CarOutlined,
+  PrinterFilled,
 } from "@ant-design/icons";
 import "../User.css";
 import PropTypes from "prop-types";
 import dayjs from "dayjs"; // Make sure dayjs is imported
 import { addDriver, deleteDriver, updateDriver } from "../../../services/api";
+import DriverExportCSV from "../../../components/CSV/DriverExportCSV";
 
 
 const { Title } = Typography;
@@ -59,6 +61,8 @@ const Drivers = ({
   const [driverToDelete, setDriverToDelete] = useState(null);
   const [driverDetailVisible, setDriverDetailVisible] = useState(false);
   const [viewingDriver, setViewingDriver] = useState(null);
+  const csvLinkRef = useRef();
+
   const pageSize = 5;
   const token = localStorage.getItem("token");
 
@@ -72,7 +76,6 @@ const Drivers = ({
 
   // Function to show driver details
   const showDriverDetails = (driver) => {
-    console.log("Viewing Driver Data:", driver); // Check if driver data is available
     setViewingDriver(driver);
     setDriverDetailVisible(true);
   };
@@ -144,10 +147,8 @@ const Drivers = ({
 
   // Driver details modal
   const showDriverModal = (driver = null) => {
-    console.log(driver)
     setSelectedDriver(driver);
     if (driver) {
-      console.log(driver)
       driverForm.setFieldsValue({
         name: driver.name,
         phone: driver.phone,
@@ -176,7 +177,6 @@ const Drivers = ({
 
   // Handle driver form submission
   const handleDriverFormSubmit = async (values) => {
-    console.log("Driver Form Values:", values); // Log the form values
     if (selectedDriver) {
       // Update existing driver
       const res = await updateDriver(values, selectedDriver.id, token);
@@ -197,18 +197,7 @@ const Drivers = ({
       message.success("อัพเดตข้อมูลพนักงานขับรถสำเร็จ");
     } else {
       // Add new driver
-      const res = await addDriver(values,token);
-      console.log(res)
-      // const newDriver = {
-      //   id: (drivers.length + 1).toString(),
-      //   ...values,
-      //   trips: 0,
-      //   totalKm: 0,
-      //   avgRating: 0,
-      //   assignedVehicle: values.assignedVehicleId
-      //     ? trucks.find((truck) => truck.id === values.assignedVehicleId)
-      //     : null,
-      // };
+      const res = await addDriver(values, token);
       let data = {
         address: res.data.address,
         birthDay: res.data.birthDay,
@@ -239,7 +228,7 @@ const Drivers = ({
   const handleDeleteDriver = async () => {
     if (driverToDelete) {
       const res = await deleteDriver(driverToDelete.id, token);
-      if(res.success === false){
+      if (res.success === false) {
         message.error(res.message);
         return;
       }
@@ -253,6 +242,13 @@ const Drivers = ({
       setDriverToDelete(null);
     }
   };
+
+  const exportCSV = () => {
+    if (csvLinkRef.current) {
+      csvLinkRef.current.link.click(); // trigger click event
+    }
+  };
+  
 
   return (
     <>
@@ -272,6 +268,14 @@ const Drivers = ({
           >
             เพิ่มพนักงานขับรถ
           </Button>
+          <Button
+            type="primary"
+            icon={<PrinterFilled />}
+            onClick={exportCSV}
+          >
+            Export to excel
+          </Button>
+          <DriverExportCSV data={drivers} ref={csvLinkRef} />
         </Space>
       </div>
 

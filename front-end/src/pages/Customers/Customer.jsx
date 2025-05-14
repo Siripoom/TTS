@@ -16,6 +16,8 @@ import {
   Dropdown,
   Menu,
   message,
+  Drawer,
+  Flex,
 } from "antd";
 import {
   UserOutlined,
@@ -25,6 +27,7 @@ import {
   MoreOutlined,
   EyeOutlined,
   PlusOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
@@ -32,6 +35,7 @@ import Header from "../../components/Header/Header";
 import "./Customer.css";
 import PropTypes from "prop-types";
 import { addCustomer, getCustomers, updateCustomer, deleteCustomer } from "../../services/api";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -41,6 +45,8 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [invoiceDetail, setInvoiceDetail] = useState(false)
+  const [selectedInvoice, setSelectedInvoice] = useState(null)
   const [customerToDelete, setCustomerToDelete] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -154,7 +160,7 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
         message.error("ไม่สามารถเพิ่มลูกค้าได้");
         return;
       }
-      
+
       // const newCustomer = {
       //   id: (customers.length + 1).toString(),
       //   ...values,
@@ -197,6 +203,18 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
     setSelectedCustomer(customer);
   };
 
+  const handleShowDrawer = (record) => {
+    setSelectedInvoice(record)
+    setInvoiceDetail(true)
+  }
+
+  const handleCloseDrawer = () => {
+    setInvoiceDetail(false)
+    setSelectedInvoice(null)
+  }
+
+  const createPDF = () => { }
+
   // Customer list columns
   const columns = [
     {
@@ -225,6 +243,7 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
       title: "วันที่สร้าง",
       dataIndex: "createdAt",
       key: "createdAt",
+      render: (date) => ( dayjs(date).format("YYYY-MM-DD") )
     },
     {
       title: "ACTION",
@@ -255,65 +274,63 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
   const invoiceColumns = [
     {
       title: "เลขใบวางบิล",
-      dataIndex: "invoiceNumber",
-      key: "invoiceNumber",
+      dataIndex: "id",
+      key: "id",
     },
     {
       title: "วันที่",
-      dataIndex: "date",
-      key: "date",
+      dataIndex: "dueDate",
+      key: "dueDate",
     },
     {
       title: "จำนวนเงิน",
-      dataIndex: "amount",
-      key: "amount",
-      render: (amount) => `฿${amount.toFixed(2)}`,
-    },
-    {
-      title: "สถานะ",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <span
-          style={{
-            color: status === "ชำระแล้ว" ? "#52c41a" : "#f5222d",
-            fontWeight: "bold",
-          }}
-        >
-          {status}
-        </span>
-      ),
+      dataIndex: "totalAmount",
+      key: "totalAmount",
+      render: (amount) => `฿ ${amount}`,
     },
     {
       title: "",
       key: "action",
       render: (_, record) => (
-        <Button type="link" onClick={() => showInvoiceDetails(record.id)}>
+        <Button type="link" onClick={() => handleShowDrawer(record)}>
           ดูรายละเอียด
         </Button>
       ),
     },
   ];
 
-  // Purchase history columns
-  const purchaseColumns = [
+  const columnDetail = [
     {
-      title: "สินค้า",
-      dataIndex: "product",
-      key: "product",
+      title: 'ชื่อสินค้า',
+      dataIndex: 'product',
+      key: 'product',
+      render: (product) => product.name || '-'
     },
     {
-      title: "วันที่",
-      dataIndex: "date",
-      key: "date",
+      title: 'ราคา',
+      dataIndex: 'price',
+      key: 'price',
     },
     {
-      title: "จำนวนเงิน",
-      dataIndex: "amount",
-      key: "amount",
-      render: (amount) => `฿${amount.toFixed(2)}`,
+      title: 'จำนวน',
+      dataIndex: 'quantity',
+      key: 'quantity',
     },
-  ];
+    {
+      title: 'น้ำหนักสุทธิ',
+      dataIndex: 'weight',
+      key: 'weight',
+    },
+    {
+      title: 'ราคารวม',
+      dataIndex: 'amount',
+      key: 'amount',
+    },
+  ]
+
+  useEffect(() => {
+    console.log(invoiceDetail)
+  },[invoiceDetail])
 
   return (
     <div className={`admin-layout ${sidebarVisible ? "" : "sidebar-closed"}`}>
@@ -428,27 +445,27 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
                           <TabPane tab="ใบวางบิล" key="1">
                             <Table
                               columns={invoiceColumns}
-                              dataSource={selectedCustomer.Invoice}
+                              dataSource={selectedCustomer.InvoiceCustomerItem}
                               pagination={false}
                               rowKey="id"
-                              // summary={(pageData) => {
-                              //   let totalAmount = 0;
-                              //   pageData.forEach(({ amount }) => {
-                              //     totalAmount += amount;
-                              //   });
-                              //   return (
-                              //     <Table.Summary.Row>
-                              //       <Table.Summary.Cell colSpan={2}>
-                              //         <strong>รวมทั้งหมด</strong>
-                              //       </Table.Summary.Cell>
-                              //       <Table.Summary.Cell>
-                              //         <Text strong>
-                              //           ฿{totalAmount.toFixed(2)}
-                              //         </Text>
-                              //       </Table.Summary.Cell>
-                              //     </Table.Summary.Row>
-                              //   );
-                              // }}
+                            // summary={(pageData) => {
+                            //   let totalAmount = 0;
+                            //   pageData.forEach(({ amount }) => {
+                            //     totalAmount += amount;
+                            //   });
+                            //   return (
+                            //     <Table.Summary.Row>
+                            //       <Table.Summary.Cell colSpan={2}>
+                            //         <strong>รวมทั้งหมด</strong>
+                            //       </Table.Summary.Cell>
+                            //       <Table.Summary.Cell>
+                            //         <Text strong>
+                            //           ฿{totalAmount.toFixed(2)}
+                            //         </Text>
+                            //       </Table.Summary.Cell>
+                            //     </Table.Summary.Row>
+                            //   );
+                            // }}
                             />
                           </TabPane>
                         </Tabs>
@@ -548,6 +565,45 @@ const Customers = ({ sidebarVisible, toggleSidebar }) => {
         <p>คุณแน่ใจที่จะลบลูกค้า "{customerToDelete?.name}" หรือไม่?</p>
         <p>การกระทำนี้จะไม่สามารถเปลี่ยนกลับได้</p>
       </Modal>
+
+      <Drawer
+        visible={invoiceDetail}
+        onClose={() => handleCloseDrawer()}
+        width={800}
+      >
+        <div style={{ padding: '20px' }}>
+          <Title level={3}>รายละเอียดใบวางบิล</Title>
+
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              <p>เลขที่ใบวางบิล : {selectedInvoice && selectedInvoice.id}</p>
+            </Col>
+            <Col span={12}>
+              <p>วันที่ : {selectedInvoice && dayjs(selectedInvoice.dueDate).format('DD/MM/YYYY')}</p>
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              <p>ชื่อลูกค้า : {selectedInvoice && selectedCustomer.name}</p>
+            </Col>
+            <Col span={12}>
+              <p>ราคารวม : {selectedInvoice && selectedInvoice.totalAmount}</p>
+            </Col>
+          </Row>
+        </div>
+
+        <Table
+          columns={columnDetail}
+          dataSource={selectedInvoice ? selectedInvoice.InvoiceCustomer : []}
+          rowKey="id"
+          pagination={false}
+          scroll={{ x: 800 }}
+        />
+        <Flex justify="end" style={{ marginTop: '20px' }}>
+          <Button type='primary' style={{ marginRight: "10px" }} onClick={createPDF}><PrinterOutlined /></Button>
+          <Button onClick={() => handleCloseDrawer()}>ปิด</Button>
+        </Flex>
+      </Drawer>
     </div>
   );
 };

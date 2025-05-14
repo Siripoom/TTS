@@ -33,6 +33,8 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import Header from "../../components/Header/Header";
 import "./Costs.css";
 import PropTypes from "prop-types";
+import { getCosts, getDrivers, getVehicles, updateCost , addCost } from "../../services/api";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -44,6 +46,8 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [recordToDelete, setRecordToDelete] = useState(null);
+  const [driverList, setDriverList] = useState([]);
+  const [vehicleList, setVehicleList] = useState([]);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [stats, setStats] = useState({
@@ -54,123 +58,19 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
   });
 
   const pageSize = 10;
+  const token = localStorage.getItem("token");
 
-  // Load mock data
-  useEffect(() => {
-    const mockExpenseRecords = [
-      {
-        id: "1",
-        date: "2025-04-15",
-        expenseType: "ค่าทางด่วน",
-        description: "ค่าทางด่วนพิเศษ กรุงเทพ-พัทยา",
-        amount: 250,
-        paidBy: "บริษัท",
-        vehicle: "กข-1234",
-        driver: "นายสมชาย ใจดี",
-        status: "approved",
-        approvedBy: "Admin",
-        receiptNo: "R-20250415-001",
-      },
-      {
-        id: "2",
-        date: "2025-04-14",
-        expenseType: "ค่าปรับจราจร",
-        description: "ค่าปรับจอดในที่ห้ามจอด",
-        amount: 500,
-        paidBy: "พนักงาน",
-        vehicle: "ขค-5678",
-        driver: "นายสมศักดิ์ รักดี",
-        status: "pending",
-        approvedBy: "",
-        receiptNo: "TF-20250414-001",
-      },
-      {
-        id: "3",
-        date: "2025-04-10",
-        expenseType: "ค่าที่พัก",
-        description: "ค่าที่พักคนขับ จ.เชียงใหม่",
-        amount: 800,
-        paidBy: "บริษัท",
-        vehicle: "คง-9012",
-        driver: "นายสมหมาย พึ่งได้",
-        status: "approved",
-        approvedBy: "Admin",
-        receiptNo: "R-20250410-002",
-      },
-      {
-        id: "4",
-        date: "2025-04-05",
-        expenseType: "ค่าทางด่วน",
-        description: "ค่าทางด่วนพิเศษ กรุงเทพ-ชลบุรี",
-        amount: 180,
-        paidBy: "บริษัท",
-        vehicle: "กข-1234",
-        driver: "นายสมชาย ใจดี",
-        status: "approved",
-        approvedBy: "Admin",
-        receiptNo: "R-20250405-003",
-      },
-      {
-        id: "5",
-        date: "2025-04-03",
-        expenseType: "ค่าอาหาร",
-        description: "ค่าเบี้ยเลี้ยงคนขับ",
-        amount: 300,
-        paidBy: "บริษัท",
-        vehicle: "งจ-3456",
-        driver: "นายสมพงษ์ นามสกุล",
-        status: "approved",
-        approvedBy: "Admin",
-        receiptNo: "R-20250403-004",
-      },
-      {
-        id: "6",
-        date: "2025-03-28",
-        expenseType: "ค่าที่พัก",
-        description: "ค่าที่พักคนขับ จ.ระยอง",
-        amount: 650,
-        paidBy: "บริษัท",
-        vehicle: "ขค-5678",
-        driver: "นายสมศักดิ์ รักดี",
-        status: "approved",
-        approvedBy: "Admin",
-        receiptNo: "R-20250328-005",
-      },
-      {
-        id: "7",
-        date: "2025-03-25",
-        expenseType: "ค่าจอดรถ",
-        description: "ค่าจอดรถ ท่าเรือคลองเตย",
-        amount: 150,
-        paidBy: "พนักงาน",
-        vehicle: "คง-9012",
-        driver: "นายสมหมาย พึ่งได้",
-        status: "rejected",
-        approvedBy: "Admin",
-        receiptNo: "R-20250325-006",
-      },
-      {
-        id: "8",
-        date: "2025-03-20",
-        expenseType: "ค่าปรับจราจร",
-        description: "ค่าปรับขับรถเร็วเกินกำหนด",
-        amount: 800,
-        paidBy: "พนักงาน",
-        vehicle: "จฉ-7890",
-        driver: "",
-        status: "pending",
-        approvedBy: "",
-        receiptNo: "TF-20250320-002",
-      },
-    ];
-
-    setExpenseRecords(mockExpenseRecords);
+  const fetchCosts = async () => {
+    try {
+      const res = await getCosts (token);
+      console.log(res.data);
+      setExpenseRecords(res.data);
 
     // Calculate statistics
-    const approvedRecords = mockExpenseRecords.filter(
+    const approvedRecords = res.data.filter(
       (record) => record.status === "approved"
     );
-    const totalRecords = mockExpenseRecords.length;
+    const totalRecords = res.data.length;
     const totalCost = approvedRecords.reduce(
       (sum, record) => sum + record.amount,
       0
@@ -203,32 +103,64 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
       avgCost,
       expenseTypes,
     });
+    } catch (error) {
+      console.error("Error fetching costs:", error);
+      message.error("ไม่สามารถดึงข้อมูลค่าใช้จ่ายได้");
+    }
+  };
+
+  const fetchDriver = async () => {
+    try {
+      const resDriver = await getDrivers(token);
+      console.log(resDriver.data);
+      setDriverList(resDriver.data);
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
+      message.error("ไม่สามารถดึงข้อมูลคนขับได้");
+    }
+  };
+  const fetchVehicle = async () => {
+    try {
+      const resVehicle = await getVehicles(token);
+      console.log(resVehicle.data);
+      setVehicleList(resVehicle.data);
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+      message.error("ไม่สามารถดึงข้อมูลทะเบียนรถได้");
+    }
+  };
+  // Load mock data
+  useEffect(() => {
+    fetchCosts();
+    fetchDriver();
+    fetchVehicle();
   }, []);
 
   // Filter records based on search text
   const filteredRecords = expenseRecords.filter(
     (record) =>
-      record.expenseType.toLowerCase().includes(searchText.toLowerCase()) ||
+      record.costType.toLowerCase().includes(searchText.toLowerCase()) ||
       record.description.toLowerCase().includes(searchText.toLowerCase()) ||
-      record.vehicle.toLowerCase().includes(searchText.toLowerCase()) ||
-      (record.driver &&
-        record.driver.toLowerCase().includes(searchText.toLowerCase()))
+      record.Vehicle.plateNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+      (record.Driver.name &&
+        record.Driver.name.toLowerCase().includes(searchText.toLowerCase()))
   );
 
   // Show modal for adding/editing record
   const showModal = (record = null) => {
     setSelectedRecord(record);
+    console.log(record)
     if (record) {
       form.setFieldsValue({
-        expenseType: record.expenseType,
-        date: record.date,
+        costType: record.costType,
+        date: dayjs(record.date).format("YYYY-MM-DD"),
         description: record.description,
         amount: record.amount,
-        paidBy: record.paidBy,
-        vehicle: record.vehicle,
-        driver: record.driver,
+        paymentBy: record.paymentBy,
+        vehicleId: record.vehicleId,
+        driverId: record.driverId,
         status: record.status,
-        receiptNo: record.receiptNo,
+        billNo: record.billNo,
       });
     } else {
       form.resetFields();
@@ -236,7 +168,7 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
       form.setFieldsValue({
         date: new Date().toISOString().split("T")[0],
         status: "pending",
-        paidBy: "บริษัท",
+        paymentBy: "company",
       });
     }
     setIsModalVisible(true);
@@ -249,9 +181,14 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
   };
 
   // Handle form submission
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     if (selectedRecord) {
-      // Update existing record
+      const res = await updateCost( values, selectedRecord.id, token);
+      console.log(res.data)
+      if (!res.success) {
+        message.error("ไม่สามารถอัพเดตข้อมูลค่าใช้จ่ายได้");
+        return;
+      }
       const updatedRecords = expenseRecords.map((record) =>
         record.id === selectedRecord.id
           ? {
@@ -269,20 +206,9 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
       setExpenseRecords(updatedRecords);
       message.success("อัพเดตข้อมูลค่าใช้จ่ายเรียบร้อยแล้ว");
     } else {
-      // Create new record
-      const newRecord = {
-        id: (expenseRecords.length + 1).toString(),
-        ...values,
-        approvedBy: values.status === "approved" ? "Admin" : "",
-        receiptNo:
-          values.receiptNo ||
-          `R-${new Date().toISOString().split("T")[0].replace(/-/g, "")}-${(
-            expenseRecords.length + 1
-          )
-            .toString()
-            .padStart(3, "0")}`,
-      };
-      setExpenseRecords([...expenseRecords, newRecord]);
+
+      const res = await addCost(values, token);
+      setExpenseRecords([...expenseRecords, res.data]);
       message.success("เพิ่มข้อมูลค่าใช้จ่ายเรียบร้อยแล้ว");
     }
     setIsModalVisible(false);
@@ -314,11 +240,14 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
       dataIndex: "date",
       key: "date",
       sorter: (a, b) => new Date(a.date) - new Date(b.date),
+      render: (date) => {
+        return <Text>{dayjs(date).format("DD/MM/YYYY")}</Text>;
+      },
     },
     {
       title: "ประเภท",
-      dataIndex: "expenseType",
-      key: "expenseType",
+      dataIndex: "costType",
+      key: "costType",
     },
     {
       title: "รายละเอียด",
@@ -328,19 +257,27 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
     },
     {
       title: "รถ",
-      dataIndex: "vehicle",
-      key: "vehicle",
+      dataIndex: "Vehicle",
+      key: "Vehicle",
+      render: (vehicle) => vehicle?.plateNumber || "-",
     },
     {
       title: "คนขับ",
-      dataIndex: "driver",
-      key: "driver",
-      render: (text) => text || "-",
+      dataIndex: "Driver",
+      key: "Driver",
+      render: (driver) => driver?.name || "-",
     },
     {
       title: "จ่ายโดย",
-      dataIndex: "paidBy",
-      key: "paidBy",
+      dataIndex: "paymentBy",
+      key: "paymentBy",
+      render: (paymentBy) => {
+        return (
+          <Tag color={paymentBy === "company" ? "blue" : "green"}>
+            {paymentBy === "company" ? "บริษัท" : "พนักงาน"}
+          </Tag>
+        );
+      },
     },
     {
       title: "จำนวนเงิน",
@@ -525,7 +462,7 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="expenseType"
+                name="costType"
                 label="ประเภทค่าใช้จ่าย"
                 rules={[
                   { required: true, message: "กรุณาเลือกประเภทค่าใช้จ่าย" },
@@ -585,13 +522,13 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
             </Col>
             <Col span={8}>
               <Form.Item
-                name="paidBy"
+                name="paymentBy"
                 label="จ่ายโดย"
                 rules={[{ required: true, message: "กรุณาเลือกผู้จ่าย" }]}
               >
                 <Select placeholder="เลือกผู้จ่าย">
-                  <Option value="บริษัท">บริษัท</Option>
-                  <Option value="พนักงาน">พนักงาน</Option>
+                  <Option value="company">บริษัท</Option> 
+                  <Option value="driver">พนักงาน</Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -613,32 +550,33 @@ const OtherExpenses = ({ sidebarVisible, toggleSidebar }) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="vehicle"
+                name="vehicleId"
                 label="ทะเบียนรถ"
                 rules={[{ required: true, message: "กรุณาเลือกทะเบียนรถ" }]}
               >
                 <Select placeholder="เลือกทะเบียนรถ">
-                  <Option value="กข-1234">กข-1234</Option>
-                  <Option value="ขค-5678">ขค-5678</Option>
-                  <Option value="คง-9012">คง-9012</Option>
-                  <Option value="งจ-3456">งจ-3456</Option>
-                  <Option value="จฉ-7890">จฉ-7890</Option>
+                  {vehicleList.map((vehicle) => (
+                    <Option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.plateNumber}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="driver" label="คนขับ">
+              <Form.Item name="driverId" label="คนขับ">
                 <Select placeholder="เลือกคนขับ (ไม่บังคับ)" allowClear>
-                  <Option value="นายสมชาย ใจดี">นายสมชาย ใจดี</Option>
-                  <Option value="นายสมศักดิ์ รักดี">นายสมศักดิ์ รักดี</Option>
-                  <Option value="นายสมหมาย พึ่งได้">นายสมหมาย พึ่งได้</Option>
-                  <Option value="นายสมพงษ์ นามสกุล">นายสมพงษ์ นามสกุล</Option>
+                  {driverList.map((driver) => (
+                    <Option key={driver.id} value={driver.id}>
+                      {driver.name}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name="receiptNo" label="เลขที่ใบเสร็จ">
+          <Form.Item name="billNo" label="เลขที่ใบเสร็จ">
             <Input placeholder="เลขที่ใบเสร็จ (ไม่บังคับ)" />
           </Form.Item>
 

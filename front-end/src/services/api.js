@@ -382,7 +382,7 @@ export const deleteVehicle = async (id, token) => {
 export const getVehicleMaintenance = async (id, token) => {
     try {
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await api.get(`/vehicles/${id}/maintenance`);
+        const response = await api.get(`/vehicles/${id}/maintenances`);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -449,11 +449,257 @@ export const deleteDriver = async (id, token) => {
     }
 }
 
+// Truck Queue
+export const getTruckQueues = async (token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get("/truck-queues");
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getTruckQueueById = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get(`/truck-queues/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const addTruckQueue = async (data, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.post("/truck-queues", data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const updateTruckQueue = async (data, id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.put(`/truck-queues/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const deleteTruckQueue = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.delete(`/truck-queues/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
+// Maintenance
+export const getMaintenance = async (token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get("/maintenances");
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
+export const getMaintenanceById = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get(`/maintenances/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
+export const addMaintenance = async (data, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.post("/maintenances", data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
+export const updateMaintenance = async (data, id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.put(`/maintenances/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
+export const deleteMaintenance = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.delete(`/maintenances/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+// Cost
+export const getCosts = async (token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get("/costs");
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const getCostById = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get(`/costs/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const addCost = async (data, token) => {
+    console.log("Add cost data:", data);
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.post("/costs", data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const updateCost = async (data, id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.put(`/costs/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const deleteCost = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.delete(`/costs/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+// Invoice Supplier
+export const getInvoiceSupplier = async (token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get("/invoices-supplier");
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const getInvoiceSupplierById = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get(`/invoices-supplier/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const addInvoiceSupplier = async (data, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.post("/invoices-supplier", data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const updateInvoiceSupplier = async (data, id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.put(`/invoices-supplier/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const deleteInvoiceSupplier = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.delete(`/invoices-supplier/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+// Invoice Customer
+export const getInvoiceCustomer = async (token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get("/invoices-customer");
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const getInvoiceCustomerById = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get(`/invoices-customer/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const addInvoiceCustomer = async (data, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.post("/invoices-customer", data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const updateInvoiceCustomer = async (data, id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.put(`/invoices-customer/${id}`, data);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const deleteInvoiceCustomer = async (id, token) => {
+    try {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.delete(`/invoices-customer/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 
 

@@ -13,6 +13,17 @@ export const getSuppliers = async (req, res) => {
     const suppliers = await prisma.supplier.findMany({
       include: {
         Product: true,
+        InvoiceSupplier: {
+          include:{
+            product:true,
+            truckQueue:{
+              include:{
+                vehicle:true,
+                driver:true
+              }
+            }
+          }
+        },
         _count: {
           select: {
             TruckQueue: true,

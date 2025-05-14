@@ -19,13 +19,16 @@ export const getCustomers = async (req, res) => {
             createdAt: true,
           },
         },
-        Invoice: {
-          select: {
-            id: true,
-            totalAmount: true,
-            status: true,
-          },
-        },
+        InvoiceCustomerItem: {
+          include:{
+            InvoiceCustomer:{
+              include:{
+                product:true
+              }
+            }
+            
+          }
+        }
       },
     });
 
@@ -57,7 +60,7 @@ export const getCustomerById = async (req, res) => {
       },
       include: {
         TruckQueue: true,
-        Invoice: true,
+        InvoiceCustomerItem: true,
       },
     });
 

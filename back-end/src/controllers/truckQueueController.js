@@ -12,34 +12,10 @@ export const getTruckQueues = async (req, res) => {
   try {
     const queues = await prisma.truckQueue.findMany({
       include: {
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            contactInfo: true,
-          },
-        },
-        vehicle: {
-          select: {
-            id: true,
-            plateNumber: true,
-            model: true,
-          },
-        },
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        supplier: {
-          select: {
-            id: true,
-            name: true,
-            contactInfo: true,
-          },
-        },
+        customer: true,
+        vehicle:true,
+        driver: true,
+        supplier:true
       },
       orderBy: {
         createdAt: "desc",
@@ -115,13 +91,15 @@ export const getTruckQueueById = async (req, res) => {
  * @access  Private/Admin
  */
 export const createTruckQueue = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
+  // const errors = validationResult(req);
+  // if (!errors.isEmpty()) {
+  //   console.log("Validation errors:", errors.array());
+  //   return res.status(400).json({
+  //     success: false,
+  //     errors: errors.array(),
+
+  //   });
+  // }
 
   const {
     customerId,
@@ -131,6 +109,7 @@ export const createTruckQueue = async (req, res) => {
     distanceKm,
     tripType,
     overnight,
+    dueDate
   } = req.body;
 
   try {
@@ -140,7 +119,7 @@ export const createTruckQueue = async (req, res) => {
       vehicleId
         ? prisma.vehicle.findUnique({ where: { id: vehicleId } })
         : true,
-      driverId ? prisma.user.findUnique({ where: { id: driverId } }) : true,
+      driverId ? prisma.driver.findUnique({ where: { id: driverId } }) : true,
       prisma.supplier.findUnique({ where: { id: supplierId } }),
     ]);
 
@@ -182,18 +161,13 @@ export const createTruckQueue = async (req, res) => {
         distanceKm: distanceKm ? parseFloat(distanceKm) : null,
         tripType: tripType || "full_delivery",
         overnight: overnight || false,
+        dueDate,
         status: "pending",
       },
       include: {
         customer: true,
         vehicle: true,
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        driver: true,
         supplier: true,
       },
     });
@@ -227,7 +201,7 @@ export const updateTruckQueue = async (req, res) => {
   }
 
   try {
-    const { vehicleId, driverId, status, distanceKm, tripType, overnight } =
+    const { vehicleId, driverId, status, distanceKm, tripType, overnight , dueDate } =
       req.body;
 
     // Check if queue exists
@@ -255,16 +229,6 @@ export const updateTruckQueue = async (req, res) => {
       }
     }
 
-    if (driverId) {
-      const driver = await prisma.user.findUnique({ where: { id: driverId } });
-      if (!driver || driver.role !== "driver") {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid driver ID or user is not a driver",
-        });
-      }
-    }
-
     // Prepare update data
     const updateData = {};
     if (vehicleId !== undefined) updateData.vehicleId = vehicleId;
@@ -274,6 +238,7 @@ export const updateTruckQueue = async (req, res) => {
       updateData.distanceKm = parseFloat(distanceKm);
     if (tripType !== undefined) updateData.tripType = tripType;
     if (overnight !== undefined) updateData.overnight = overnight;
+    if (dueDate !== undefined) updateData.dueDate = dueDate;
 
     // Update queue
     const updatedQueue = await prisma.truckQueue.update({
@@ -284,13 +249,7 @@ export const updateTruckQueue = async (req, res) => {
       include: {
         customer: true,
         vehicle: true,
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        driver: true,
         supplier: true,
       },
     });
