@@ -8,6 +8,12 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 
+# คัดลอกเฉพาะโฟลเดอร์ prisma ก่อน
+COPY prisma ./prisma/
+
+# Generate Prisma client
+RUN npx prisma generate
+
 # คัดลอกโค้ดทั้งหมดไปยัง container
 COPY . .
 
