@@ -9,8 +9,7 @@
     "generate": "npx prisma generate",
     "db-seed": "npx prisma db seed",
     "db-pull": "npx prisma db pull",
-    "db-push": "npx prisma db push",
-    "postinstall": "prisma migrate deploy"
+    "db-push": "npx prisma db push"
   },
   "keywords": [],
   "author": "",

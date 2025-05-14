@@ -1,18 +1,18 @@
-# ใช้ Node.js เวอร์ชันล่าสุด
 FROM node:18
 
-# กำหนดโฟลเดอร์ทำงานใน Container
 WORKDIR /app
 
-# คัดลอก package.json และติดตั้ง dependencies
+# คัดลอก package.json
 COPY package.json ./
-RUN npm install
 
 # คัดลอกเฉพาะโฟลเดอร์ prisma ก่อน
 COPY prisma ./prisma/
 
-# Generate Prisma client
-RUN npx prisma generate
+# ตรวจสอบว่าไฟล์ schema.prisma มีอยู่
+RUN ls -la prisma/
+
+# ติดตั้ง dependencies
+RUN npm install
 
 # คัดลอกโค้ดทั้งหมดไปยัง container
 COPY . .
