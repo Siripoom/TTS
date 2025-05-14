@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 import { generateToken } from "../Helper/tokenHelper.js";
+
 import { validationResult } from "express-validator";
 
 const prisma = new PrismaClient();
@@ -90,7 +91,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    console.log("hi")
+    console.log("hi");
     // Validate request data
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 /**
  * Generate JWT token for authentication
@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
  * @param {string} name - Optional secret key for signing the token
  * @returns {string} JWT token
  */
-const generateToken = (userId, role, name) => {
+export const generateToken = (userId, role, name) => {
   return jwt.sign(
     {
       id: userId,
@@ -24,11 +24,6 @@ const generateToken = (userId, role, name) => {
  * @param {string} token - JWT token to verify
  * @returns {object} Decoded token payload
  */
-const verifyToken = (token) => {
+export const verifyToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
-};
-
-module.exports = {
-  generateToken,
-  verifyToken,
 };
