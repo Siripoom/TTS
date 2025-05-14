@@ -65,7 +65,7 @@ function App() {
 
           {/* Admin Routes /admin/dashboard*/}
           <Route
-            path="/admin/dashboard"
+            path="/"
             element={
               <Dashboard
                 sidebarVisible={sidebarVisible}

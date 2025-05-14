@@ -35,7 +35,7 @@ const Sidebar = () => {
 
       <nav className="sidebar-nav">
         <NavLink
-          to="/admin/dashboard"
+          to="/"
           className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
           onClick={() => setActiveItem("dashboard")}
         >
