@@ -6,7 +6,7 @@ WORKDIR /app
 
 # คัดลอก package.json และติดตั้ง dependencies
 COPY package.json ./
-RUN yarn install
+RUN npm install
 
 # คัดลอกโค้ดทั้งหมดไปยัง container
 COPY . .
