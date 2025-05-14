@@ -2,29 +2,18 @@ FROM node:18
 
 WORKDIR /app
 
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
-
-# คัดลอก package.json
+# คัดลอก package.json และติดตั้ง dependencies
 COPY package.json ./
+RUN npm install
 
 # คัดลอกเฉพาะโฟลเดอร์ prisma ก่อน
 COPY prisma ./prisma/
 
-# ตรวจสอบว่าไฟล์ schema.prisma มีอยู่
-RUN ls -la prisma/
-
-# ติดตั้ง dependencies
-RUN npm install
-
 # คัดลอกโค้ดทั้งหมดไปยัง container
 COPY . .
 
-RUN echo "DATABASE_URL=${DATABASE_URL}" > prisma/.env && \
-    npx prisma db push && \
-    npx prisma generate && \
-    rm prisma/.env
-
+# เปิดพอร์ตที่ใช้งาน
 EXPOSE 5000
 
-CMD ["node", "src/server.js"]%         
+# ใช้ shell script เพื่อรัน migration และ start server
+CMD ["sh", "-c", "echo \"DATABASE_URL=$DATABASE_URL\" > prisma/.env && npx prisma generate && npx prisma db push && node src/server.js && rm prisma/.env"]
