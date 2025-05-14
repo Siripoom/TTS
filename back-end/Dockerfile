@@ -5,8 +5,8 @@ FROM node:18
 WORKDIR /app
 
 # คัดลอก package.json และติดตั้ง dependencies
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package.json ./
+RUN yarn install
 
 # คัดลอกโค้ดทั้งหมดไปยัง container
 COPY . .
