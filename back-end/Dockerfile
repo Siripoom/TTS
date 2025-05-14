@@ -17,8 +17,11 @@ RUN npm install
 # คัดลอกโค้ดทั้งหมดไปยัง container
 COPY . .
 
-# เปิดพอร์ตที่ใช้งาน
+RUN echo "DATABASE_URL=${DATABASE_URL}" > prisma/.env && \
+    npx prisma db push && \
+    npx prisma generate && \
+    rm prisma/.env
+
 EXPOSE 5000
 
-# คอมไพล์ Prisma Client และรันเซิร์ฟเวอร์
-CMD ["sh", "-c", "npx prisma generate && node src/server.js"]
+CMD ["node", "src/server.js"]%         
