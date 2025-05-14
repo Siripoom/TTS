@@ -15,10 +15,11 @@ import {
   message,
   Drawer,
   Tag,
+  Divider,
   Popconfirm,
   Select,
   InputNumber,
-  Flex
+  Flex,
 } from "antd";
 import {
   ShopOutlined,
@@ -35,7 +36,14 @@ import Header from "../../components/Header/Header";
 
 import "./Supplier.css";
 import PropTypes from "prop-types";
-import { addSupplier, getSuppliers, updateSupplier, deleteSupplier, updateProduct, addProduct } from "../../services/api"; // Mock API call
+import {
+  addSupplier,
+  getSuppliers,
+  updateSupplier,
+  deleteSupplier,
+  updateProduct,
+  addProduct,
+} from "../../services/api"; // Mock API call
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
@@ -59,15 +67,23 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
   const [modalProductDelete, setModalProductDelete] = useState(false);
   const pageSize = 10;
   const token = localStorage.getItem("token");
+  const [categories, setCategories] = useState([
+    "อะไหล่รถยนต์",
+    "น้ำมันและสารหล่อลื่น",
+    "ยางรถยนต์",
+    "อุปกรณ์ตกแต่ง",
+    "อุปกรณ์ตกแต่งภายใน",
+    "อื่นๆ",
+  ]);
+  const [newCategory, setNewCategory] = useState("");
 
   const fetchSuppliers = async () => {
     const res = await getSuppliers(token);
     console.log(res);
     setSuppliers(res.data);
-  }
+  };
   useEffect(() => {
     // Mock data - replace with actual API call later
-
 
     fetchSuppliers();
     const mockSuppliers = [
@@ -210,10 +226,15 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
     }
     setIsModalVisible(true);
   };
-
+  const addCategory = () => {
+    if (newCategory && !categories.includes(newCategory)) {
+      setCategories([...categories, newCategory]);
+      setNewCategory("");
+    }
+  };
   const showModalProduct = (product = null) => {
     setSelectedProduct(product);
-    console.log(product)
+    console.log(product);
     if (product) {
       form.setFieldsValue({
         name: product.name,
@@ -233,16 +254,11 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
   };
 
   const handleSubmitProduct = async (values) => {
-    console.log(selectedSupplier)
+    console.log(selectedSupplier);
     values.supplierId = selectedSupplier.id;
     if (selectedProduct) {
-
       // Update existing product
-      const res = await updateProduct(
-        values,
-        selectedProduct.id,
-        token
-      );
+      const res = await updateProduct(values, selectedProduct.id, token);
       if (!res.success) {
         message.error("เกิดข้อผิดพลาดในการอัพเดตสินค้า");
         return;
@@ -255,12 +271,15 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
     } else {
       // Create new product
       const res = await addProduct(values, token);
-      console.log(res)
+      console.log(res);
       if (!res.success) {
         message.error("เกิดข้อผิดพลาดในการเพิ่มสินค้า");
         return;
       }
-      setSelectedSupplier({ ...selectedSupplier, Product: [...selectedSupplier.Product, res.data] });
+      setSelectedSupplier({
+        ...selectedSupplier,
+        Product: [...selectedSupplier.Product, res.data],
+      });
 
       message.success("เพิ่มสินค้าใหม่เรียบร้อยแล้ว");
     }
@@ -271,11 +290,7 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
   const handleSubmit = async (values) => {
     if (selectedSupplier) {
       // Update existing supplier
-      const res = await updateSupplier(
-        values,
-        selectedSupplier.id,
-        token
-      );
+      const res = await updateSupplier(values, selectedSupplier.id, token);
       if (!res.success) {
         message.error("เกิดข้อผิดพลาดในการอัพเดตซัพพลายเออร์");
         return;
@@ -314,7 +329,7 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
   // Function to close invoice details drawer
   const closeInvoiceDetails = () => {
     setInvoiceDetailsVisible(false);
-    setSelectedInvoice(null)
+    setSelectedInvoice(null);
   };
 
   const showDeleteConfirm = (supplier) => {
@@ -324,7 +339,6 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
 
   const handleDeleteConfirm = async () => {
     if (supplierToDelete) {
-
       const res = await deleteSupplier(supplierToDelete.id, token);
       if (!res.success) {
         message.error("เกิดข้อผิดพลาดในการลบซัพพลายเออร์");
@@ -341,7 +355,7 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
   };
 
   const handleViewSupplier = (supplier) => {
-    console.log(supplier)
+    console.log(supplier);
     setSelectedSupplier(supplier);
   };
 
@@ -350,7 +364,7 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
     setSelectedProduct(null);
   };
 
-  const createPDF = () => {}
+  const createPDF = () => {};
 
   // Supplier list columns
   const columns = [
@@ -374,7 +388,7 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
       title: "วันที่สร้าง",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date) => (dayjs(date).format("YYYY-MM-DD"))
+      render: (date) => dayjs(date).format("YYYY-MM-DD"),
     },
     {
       title: "ACTION",
@@ -487,7 +501,7 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
       title: "วันที่",
       dataIndex: "dueDate",
       key: "dueDate",
-      render: (date) => dayjs(date).format("YYYY-MM-DD")
+      render: (date) => dayjs(date).format("YYYY-MM-DD"),
     },
     {
       title: "จำนวนเงิน",
@@ -533,8 +547,8 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
   ];
 
   useEffect(() => {
-    console.log(selectedInvoice)
-  },[selectedInvoice])
+    console.log(selectedInvoice);
+  }, [selectedInvoice]);
 
   return (
     <div className={`admin-layout ${sidebarVisible ? "" : "sidebar-closed"}`}>
@@ -576,7 +590,7 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
                     </Button>
                   </div>
 
-                  <Row gutter={[24, 24]} >
+                  <Row gutter={[24, 24]}>
                     <Col xs={24} md={8}>
                       <Card className="info-card">
                         <div className="supplier-avatar ">
@@ -593,7 +607,9 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
                           </p>
                           <p>
                             <strong>วันที่สร้าง:</strong>{" "}
-                            {dayjs(selectedSupplier.createdAt).format("YYYY-MM-DD")}
+                            {dayjs(selectedSupplier.createdAt).format(
+                              "YYYY-MM-DD"
+                            )}
                           </p>
                         </div>
                         <div className="supplier-actions">
@@ -616,7 +632,6 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
                           dataSource={selectedSupplier.InvoiceSupplier}
                           pagination={false}
                           rowKey="id"
-
                         />
                       </Card>
                     </Col>
@@ -764,15 +779,34 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
                 label="หมวดหมู่"
                 rules={[{ required: true, message: "กรุณาเลือกหมวดหมู่" }]}
               >
-                <Select placeholder="เลือกหมวดหมู่">
-                  <Option value="อะไหล่รถยนต์">อะไหล่รถยนต์</Option>
-                  <Option value="น้ำมันและสารหล่อลื่น">
-                    น้ำมันและสารหล่อลื่น
-                  </Option>
-                  <Option value="ยางรถยนต์">ยางรถยนต์</Option>
-                  <Option value="อุปกรณ์ตกแต่ง">อุปกรณ์ตกแต่ง</Option>
-                  <Option value="อุปกรณ์ตกแต่งภายใน">อุปกรณ์ตกแต่งภายใน</Option>
-                  <Option value="อื่นๆ">อื่นๆ</Option>
+                <Select
+                  placeholder="เลือกหมวดหมู่"
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: "8px 0" }} />
+                      <Space style={{ padding: "0 8px 4px" }}>
+                        <Input
+                          placeholder="หมวดหมู่ใหม่"
+                          value={newCategory}
+                          onChange={(e) => setNewCategory(e.target.value)}
+                        />
+                        <Button
+                          type="text"
+                          icon={<PlusOutlined />}
+                          onClick={addCategory}
+                        >
+                          เพิ่มหมวดหมู่
+                        </Button>
+                      </Space>
+                    </>
+                  )}
+                >
+                  {categories.map((category) => (
+                    <Select.Option key={category} value={category}>
+                      {category}
+                    </Select.Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -858,8 +892,8 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
         onClose={closeInvoiceDetails}
         width={800}
       >
-        <div style={{ padding: '20px' }}>
-          <Card >
+        <div style={{ padding: "20px" }}>
+          <Card>
             <Title level={3}>รายละเอียดใบวางบิล</Title>
 
             <Row gutter={[16, 16]}>
@@ -867,61 +901,110 @@ const Supplier = ({ sidebarVisible, toggleSidebar }) => {
                 <p>เลขที่ใบวางบิล : {selectedInvoice && selectedInvoice.id}</p>
               </Col>
               <Col span={12}>
-                <p>วันที่ : {selectedInvoice && dayjs(selectedInvoice.dueDate).format('DD/MM/YYYY')}</p>
+                <p>
+                  วันที่ :{" "}
+                  {selectedInvoice &&
+                    dayjs(selectedInvoice.dueDate).format("DD/MM/YYYY")}
+                </p>
               </Col>
             </Row>
             <Row gutter={[16, 16]}>
               <Col span={12}>
-                <p>ชื่อซัพพลายเออร์ : {selectedSupplier && selectedSupplier.name}</p>
+                <p>
+                  ชื่อซัพพลายเออร์ : {selectedSupplier && selectedSupplier.name}
+                </p>
               </Col>
               <Col span={12}>
-                <p>ราคารวม : {selectedInvoice && selectedInvoice.totalAmount}</p>
+                <p>
+                  ราคารวม : {selectedInvoice && selectedInvoice.totalAmount}
+                </p>
               </Col>
             </Row>
             <Row gutter={[16, 16]}>
               <Col span={12}>
-                <p>ระยะทาง : {selectedInvoice && selectedInvoice.truckQueue.distanceKm}</p>
+                <p>
+                  ระยะทาง :{" "}
+                  {selectedInvoice && selectedInvoice.truckQueue.distanceKm}
+                </p>
               </Col>
             </Row>
           </Card>
 
-          <Card
-            title={"รถและผู้ขับขี่"}
-            style={{ margin: '20px 0px' }}
-          >
-            <Row gutter={['16', '16']}>
+          <Card title={"รถและผู้ขับขี่"} style={{ margin: "20px 0px" }}>
+            <Row gutter={["16", "16"]}>
               <Col span={12}>
-                <p>ประเภทรถ : {selectedInvoice && selectedInvoice.truckQueue.vehicle.model}</p>
-                <p>ทะเบียนรถ : {selectedInvoice && selectedInvoice.truckQueue.vehicle.plateNumber}</p>
-                <p>น้ำมันเชื้อเพลง : {selectedInvoice && selectedInvoice.truckQueue.vehicle.type}</p>
+                <p>
+                  ประเภทรถ :{" "}
+                  {selectedInvoice && selectedInvoice.truckQueue.vehicle.model}
+                </p>
+                <p>
+                  ทะเบียนรถ :{" "}
+                  {selectedInvoice &&
+                    selectedInvoice.truckQueue.vehicle.plateNumber}
+                </p>
+                <p>
+                  น้ำมันเชื้อเพลง :{" "}
+                  {selectedInvoice && selectedInvoice.truckQueue.vehicle.type}
+                </p>
               </Col>
               <Col span={12}>
-                <p>ผู้ขับขี่ : {selectedInvoice && selectedInvoice.truckQueue.driver.name}</p>
-                <p>เลขใบขับขี่ : {selectedInvoice && selectedInvoice.truckQueue.driver.licenseNo}</p>
-                <p>ประเภทใบขับขี่ : {selectedInvoice && selectedInvoice.truckQueue.driver.licenseType}</p>
-                <p>วันหมดอายุใบขับขี่ : {selectedInvoice && selectedInvoice.truckQueue.driver.licenseExpire}</p>
-                <p>เบอร์โทร : {selectedInvoice && selectedInvoice.truckQueue.driver.phone}</p>
-                <p>ที่อยู่ : {selectedInvoice && selectedInvoice.truckQueue.driver.address}</p>
+                <p>
+                  ผู้ขับขี่ :{" "}
+                  {selectedInvoice && selectedInvoice.truckQueue.driver.name}
+                </p>
+                <p>
+                  เลขใบขับขี่ :{" "}
+                  {selectedInvoice &&
+                    selectedInvoice.truckQueue.driver.licenseNo}
+                </p>
+                <p>
+                  ประเภทใบขับขี่ :{" "}
+                  {selectedInvoice &&
+                    selectedInvoice.truckQueue.driver.licenseType}
+                </p>
+                <p>
+                  วันหมดอายุใบขับขี่ :{" "}
+                  {selectedInvoice &&
+                    selectedInvoice.truckQueue.driver.licenseExpire}
+                </p>
+                <p>
+                  เบอร์โทร :{" "}
+                  {selectedInvoice && selectedInvoice.truckQueue.driver.phone}
+                </p>
+                <p>
+                  ที่อยู่ :{" "}
+                  {selectedInvoice && selectedInvoice.truckQueue.driver.address}
+                </p>
               </Col>
             </Row>
           </Card>
 
-          <Card
-            title={"สินค้า"}
-
-          >
-            <p>ชื่อสินค้า : {selectedInvoice && selectedInvoice.product.name} </p>
-            <p>ราคาต้นทุน : {selectedInvoice && selectedInvoice.product.costPrice} </p>
+          <Card title={"สินค้า"}>
+            <p>
+              ชื่อสินค้า : {selectedInvoice && selectedInvoice.product.name}{" "}
+            </p>
+            <p>
+              ราคาต้นทุน :{" "}
+              {selectedInvoice && selectedInvoice.product.costPrice}{" "}
+            </p>
             <p>น้ำหนักเข้า : {selectedInvoice && selectedInvoice.weightIn}</p>
             <p>น้ำหนักออก : {selectedInvoice && selectedInvoice.weightOut}</p>
-            <p>น้ำหนักสุทธิ : {selectedInvoice && (selectedInvoice.weightOut - selectedInvoice.weightIn)}</p>
+            <p>
+              น้ำหนักสุทธิ :{" "}
+              {selectedInvoice &&
+                selectedInvoice.weightOut - selectedInvoice.weightIn}
+            </p>
           </Card>
-
         </div>
 
-
-        <Flex justify="end" style={{ marginTop: '20px' }}>
-          <Button type='primary' style={{ marginRight: "10px" }} onClick={createPDF}><PrinterOutlined /></Button>
+        <Flex justify="end" style={{ marginTop: "20px" }}>
+          <Button
+            type="primary"
+            style={{ marginRight: "10px" }}
+            onClick={createPDF}
+          >
+            <PrinterOutlined />
+          </Button>
           <Button onClick={closeInvoiceDetails}>ปิด</Button>
         </Flex>
       </Drawer>

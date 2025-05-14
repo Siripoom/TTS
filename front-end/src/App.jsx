@@ -21,7 +21,10 @@ import InvoiceCustomerPDF from "./components/PDF/InvoiceCustomerPDF";
 
 function App() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
-
+  localStorage.setItem(
+    "token",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijg4N2ZlMGYwLWUxZmYtNDBmNi1hZGIxLTNiNjk2OTNlNDk4NiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc0NzIyODQ5MiwiZXhwIjoxNzQ5ODIwNDkyfQ.LzDW-_faQN_SssFMhjuVqSe1GnOKiDcN6156P4FNorA"
+  );
   // Handle screen resizing
   useEffect(() => {
     const handleResize = () => {
@@ -60,7 +63,7 @@ function App() {
           <Route path="/auth/register" element={<Register />} />
           <Route path="/auth/login" element={<Login />} />
 
-          {/* Admin Routes */}
+          {/* Admin Routes /admin/dashboard*/}
           <Route
             path="/admin/dashboard"
             element={
@@ -134,12 +137,7 @@ function App() {
             }
           />
 
-          <Route
-            path="/admin/pdf"
-            element={
-              <InvoiceCustomerPDF />
-            }
-          />
+          <Route path="/admin/pdf" element={<InvoiceCustomerPDF />} />
         </Routes>
       </div>
     </BrowserRouter>
