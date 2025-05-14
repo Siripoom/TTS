@@ -50,12 +50,23 @@ export const createInvoiceSupplier = async (req, res) => {
             },
         });
 
+
+
         if (!newInvoiceSupplier) {
             return res.status(400).json({
                 success: false,
                 message: "Failed to create invoice supplier",
             });
         }
+
+        await prisma.truckQueue.update({
+            where: {
+                id: truckQueueId
+            },
+            data:{
+                status:'completed'
+            }
+        })
 
         res.status(201).json({
             success: true,

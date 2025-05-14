@@ -47,7 +47,8 @@ const InvoiceSupplier = () => {
   const fetchQueueDriver = async () => {
     try {
       const res = await getTruckQueues(token);
-      setTruckQueue(res.data)
+      const filterStatus = res.data.filter(item => item.status === 'pending')
+      setTruckQueue(filterStatus)
     } catch (error) {
       console.log(error)
     }
@@ -106,7 +107,6 @@ const InvoiceSupplier = () => {
 
   const showDrawer = (record) => {
     setSelectedInvoice(record)
-    console.log(record)
     setShowDeawer(true)
   }
 
@@ -127,6 +127,7 @@ const InvoiceSupplier = () => {
         if (res.success) {
           message.success("เพิ่มข้อมูลใบวางบิลสำเร็จ")
           fetchInvoicesSupplier()
+          fetchQueueDriver()
           closeModalForm()
 
         } else {

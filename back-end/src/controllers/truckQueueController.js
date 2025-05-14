@@ -109,6 +109,7 @@ export const createTruckQueue = async (req, res) => {
     distanceKm,
     tripType,
     overnight,
+    dueDate
   } = req.body;
 
   try {
@@ -160,6 +161,7 @@ export const createTruckQueue = async (req, res) => {
         distanceKm: distanceKm ? parseFloat(distanceKm) : null,
         tripType: tripType || "full_delivery",
         overnight: overnight || false,
+        dueDate,
         status: "pending",
       },
       include: {
@@ -199,7 +201,7 @@ export const updateTruckQueue = async (req, res) => {
   }
 
   try {
-    const { vehicleId, driverId, status, distanceKm, tripType, overnight } =
+    const { vehicleId, driverId, status, distanceKm, tripType, overnight , dueDate } =
       req.body;
 
     // Check if queue exists
@@ -227,16 +229,6 @@ export const updateTruckQueue = async (req, res) => {
       }
     }
 
-    if (driverId) {
-      const driver = await prisma.user.findUnique({ where: { id: driverId } });
-      if (!driver || driver.role !== "driver") {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid driver ID or user is not a driver",
-        });
-      }
-    }
-
     // Prepare update data
     const updateData = {};
     if (vehicleId !== undefined) updateData.vehicleId = vehicleId;
@@ -246,6 +238,7 @@ export const updateTruckQueue = async (req, res) => {
       updateData.distanceKm = parseFloat(distanceKm);
     if (tripType !== undefined) updateData.tripType = tripType;
     if (overnight !== undefined) updateData.overnight = overnight;
+    if (dueDate !== undefined) updateData.dueDate = dueDate;
 
     // Update queue
     const updatedQueue = await prisma.truckQueue.update({
@@ -256,13 +249,7 @@ export const updateTruckQueue = async (req, res) => {
       include: {
         customer: true,
         vehicle: true,
-        driver: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        driver: true,
         supplier: true,
       },
     });

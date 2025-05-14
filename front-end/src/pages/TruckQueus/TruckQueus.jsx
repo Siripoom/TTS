@@ -20,6 +20,7 @@ import {
   Select,
   InputNumber,
   message,
+  DatePicker,
 } from "antd";
 import {
   SearchOutlined,
@@ -39,7 +40,9 @@ import Header from "../../components/Header/Header";
 import "./TruckQueus.css";
 import PropTypes from "prop-types";
 import { useForm } from "antd/es/form/Form";
-import { addTruckQueue, getCustomers, getDrivers, getSuppliers, getTruckQueues, getVehicles } from "../../services/api";
+import { addTruckQueue, getCustomers, getDrivers, getSuppliers, getTruckQueues, getVehicles, updateTruckQueue } from "../../services/api";
+import { render } from "@react-pdf/renderer";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
@@ -53,9 +56,9 @@ const TruckQueus = ({ sidebarVisible, toggleSidebar }) => {
   const [customer, setCustomer] = useState([])
   const [supplier, setSupplier] = useState([])
   const [vehicle, setVehicle] = useState([])
-  const [truckQueues , setTruckQueues] = useState([])
+  const [truckQueues, setTruckQueues] = useState([])
   const [driver, setDriver] = useState([])
-  const { TabPane } = Tabs;
+
   const [form] = useForm();
   const token = localStorage.getItem("token");
   // Mock data for truck queues
@@ -231,12 +234,18 @@ const TruckQueus = ({ sidebarVisible, toggleSidebar }) => {
     },
     {
       title: "ว/ด/ป",
-      dataIndex: "createdAt",
-      key: "createdAt",
+      dataIndex: "dueDate",
+      key: "dueDate",
       ellipsis: true,
       render: (createdAt) => (
         <span title={createdAt}>{new Date(createdAt).toLocaleDateString()}</span>
       ),
+    },
+    {
+      title: "เวลา",
+      dataIndex: "dueDate",
+      key: "dueDate",
+      render: (item) => (<span>{dayjs(item).format("HH:mm")} น.</span>)
     },
     {
       title: "ชื่อลูกค้า",
@@ -348,9 +357,12 @@ const TruckQueus = ({ sidebarVisible, toggleSidebar }) => {
         tripType: data.tripType,
         distanceKm: data.distanceKm,
         overnight: data.overnight,
+        dueDate: dayjs(data.dueDate)
       })
     } else {
-      form.resetFields();
+      form.setFieldValue({
+        dueDate: dayjs()
+      })
     }
     setModalForm(true);
   }
@@ -361,24 +373,25 @@ const TruckQueus = ({ sidebarVisible, toggleSidebar }) => {
   };
 
   const onFinish = async (values) => {
-    console.log("Form values: ", values);
-    if(selectedQueue) {
+    if (selectedQueue) {
       // Update existing queue
-      console.log("Updating queue: ", selectedQueue.key);
+      const res = await updateTruckQueue(values,selectedQueue.id , token)
+      if (!res.success) {
+        message.error("ไม่สามารถสร้างคิวได้");
+        return;
+      }
+      fetchData();
+      message.success("แก้ไขคิวรถบรรทุกสำเร็จ");
     }
     else {
-      // Create new queue
-      console.log(token)
-      const res = await addTruckQueue(values ,token);
+      const res = await addTruckQueue(values, token);
       console.log("Create new queue: ", res);
       if (!res.success) {
-        console.error("Failed to create queue");
         message.error("ไม่สามารถสร้างคิวได้");
         return;
       }
       fetchData();
       message.success("สร้างคิวรถบรรทุกสำเร็จ");
-      console.log("Creating new queue");
     }
   }
 
@@ -395,7 +408,6 @@ const TruckQueus = ({ sidebarVisible, toggleSidebar }) => {
 
   const handleDeleteTruck = () => {
     // Perform delete operation here
-    console.log("Deleting truck with ID: ", orderToDelete.id);
     setModelDeleteOrder(false);
   };
 
@@ -436,10 +448,10 @@ const TruckQueus = ({ sidebarVisible, toggleSidebar }) => {
           <div className="detail-title">
             <Title level={4}>รายละเอียดคิวรถบรรทุก: {selectedQueue.key}</Title>
             <Tag
-              color={getStatusColor(selectedQueue.status=="บรรทุกอย่างเดียว" ? "blue" : "green")}
+              color={getStatusColor(selectedQueue.status == "บรรทุกอย่างเดียว" ? "blue" : "green")}
               className="status-tag"
             >
-              {selectedQueue.status=="บรรทุกอย่างเดียว" ? "บรรทุกอย่างเดียว" : "ขนส่งพร้อมส่งสินค้า"}
+              {selectedQueue.status == "บรรทุกอย่างเดียว" ? "บรรทุกอย่างเดียว" : "ขนส่งพร้อมส่งสินค้า"}
             </Tag>
           </div>
 
@@ -664,19 +676,36 @@ const TruckQueus = ({ sidebarVisible, toggleSidebar }) => {
           initialValues={{
             overnight: false, // ค่าเริ่มต้นของ Checkbox
           }}>
-          <Form.Item
-            name={"customerId"}
-            label="ลูกค้า"
-            rules={[{ required: true, message: "กรุณาเลือกลูกค้า" }]}
-          >
-            <Select>
-              {customer.map((item) => (
-                <Select.Option key={item.id} value={item.id}>
-                  {item.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+          <Row gutter={[16,16]} >
+            <Col span={12}>
+              <Form.Item
+                name={"customerId"}
+                label="ลูกค้า"
+                rules={[{ required: true, message: "กรุณาเลือกลูกค้า" }]}
+              >
+                <Select>
+                  {customer.map((item) => (
+                    <Select.Option key={item.id} value={item.id}>
+                      {item.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name={"dueDate"}
+                label="วันที่"
+                rules={[{ required: true, message: "กรุณาเลือกวันที่และเวลา" }]}
+              >
+                <DatePicker style={{width:"100%"}} showTime />
+              </Form.Item>
+            </Col>
+          </Row>
+
+
+
+
           <Form.Item
             name={"supplierId"}
             label="ซัพพลายเออร์"
