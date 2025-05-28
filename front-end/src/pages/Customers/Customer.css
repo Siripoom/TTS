@@ -1,29 +1,21 @@
+/* front-end/src/pages/Customers/Customer.css */
+
 .customer-container {
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #f5f5f5;
   min-height: calc(100vh - 64px);
 }
 
 .content-wrapper {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-.customer-container {
-  padding: 20px;
-  background-color: #f9f9f9;
-  min-height: calc(100vh - 64px);
-}
-
-.content-wrapper {
-  width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .customer-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: none;
 }
 
 .card-header {
@@ -31,21 +23,27 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .card-header h4 {
   margin: 0;
+  color: #1a2b4e;
 }
 
 .card-actions {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .pagination-container {
-  margin-top: 16px;
+  margin-top: 24px;
   display: flex;
   justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
 }
 
 /* Customer detail view styles */
@@ -54,20 +52,23 @@
 }
 
 .detail-header {
-  margin-bottom: 16px;
-}
-
-.info-card,
-.purchase-card {
-  height: 100%;
-  border-radius: 8px;
+  margin-bottom: 24px;
 }
 
 .info-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+}
+
+.purchase-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+}
+
+.info-card .ant-card-body {
+  padding: 24px;
 }
 
 .customer-avatar {
@@ -77,60 +78,292 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background-color: #f5f6fa;
-  margin-bottom: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0 auto 16px;
   font-size: 32px;
-  color: #1890ff;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .customer-info {
   width: 100%;
   text-align: left;
-  margin: 16px 0;
+  margin: 24px 0;
 }
 
 .customer-info p {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .customer-actions {
-  margin-top: auto;
+  margin-top: 24px;
   width: 100%;
+}
+
+.customer-actions .ant-btn {
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 500;
 }
 
 .purchase-card .ant-tabs-nav {
   margin-bottom: 16px;
 }
 
+.purchase-card .ant-tabs-tab {
+  font-weight: 500;
+}
+
 .empty-content {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 200px;
   color: #999;
+  background-color: #fafafa;
+  border-radius: 8px;
+  border: 2px dashed #d9d9d9;
 }
 
 .form-actions {
+  margin-bottom: 0;
+  margin-top: 24px;
+}
+
+.form-actions .ant-form-item-control-input-content {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 0;
+  gap: 8px;
+}
+
+/* Table styles */
+.ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: 600;
+  color: #262626;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: #f5f5f5;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f5f5f5;
+}
+
+/* Modal styles */
+.ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 12px 12px 0 0;
+}
+
+.ant-modal-content {
+  border-radius: 12px;
+}
+
+.ant-modal-title {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Form styles */
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #262626;
+}
+
+.ant-input,
+.ant-select-selector,
+.ant-input-number {
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-select-focused .ant-select-selector,
+.ant-input-number:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+/* Button styles */
+.ant-btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+/* Tag styles */
+.ant-tag {
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+}
+
+/* Card styles */
+.ant-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 12px 12px 0 0;
+}
+
+/* Drawer styles */
+.ant-drawer-header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ant-drawer-title {
+  font-weight: 600;
+  font-size: 18px;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .customer-container {
+    padding: 12px;
+  }
+
   .card-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
   }
 
   .card-actions {
-    margin-top: 16px;
     width: 100%;
-    justify-content: space-between;
+    flex-direction: column;
   }
 
   .card-actions input {
-    width: 60% !important;
-    margin-right: 8px !important;
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 8px;
   }
+
+  .customer-detail .ant-col {
+    margin-bottom: 16px;
+  }
+
+  .info-card,
+  .purchase-card {
+    margin-bottom: 16px;
+  }
+
+  .customer-actions .ant-btn {
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ant-table {
+    font-size: 12px;
+  }
+
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    padding: 8px 4px;
+  }
+
+  .customer-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+
+  .form-actions .ant-form-item-control-input-content {
+    flex-direction: column;
+  }
+
+  .form-actions .ant-btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+/* Loading states */
+.ant-spin-container {
+  min-height: 200px;
+}
+
+/* Success states */
+.success-text {
+  color: #52c41a;
+}
+
+.error-text {
+  color: #f5222d;
+}
+
+.warning-text {
+  color: #faad14;
+}
+
+/* Custom scrollbar */
+.ant-table-body::-webkit-scrollbar {
+  height: 6px;
+}
+
+.ant-table-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.ant-table-body::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.ant-table-body::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.customer-card,
+.info-card,
+.purchase-card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Hover effects */
+.ant-table-tbody > tr {
+  transition: all 0.3s ease;
+}
+
+.ant-table-tbody > tr:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
