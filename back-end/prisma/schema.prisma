@@ -34,18 +34,39 @@ enum Role {
 // ตารางลูกค้า (Customers)
 model Customer {
   id           String   @id @default(uuid()) @db.Uuid
-  name         String
-  contactInfo  String?
-  address      String?
-  pricePerTrip Float
+  name         String   // ชื่อลูกค้า
+  contactInfo  String?  // ข้อมูลติดต่อหลัก
+  address      String?  // ที่อยู่หลัก
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // ความสัมพันธ์กับหน่วยงาน
+  departments Department[]
+  
+  // ความสัมพันธ์เดิม
   TruckQueue TruckQueue[]
-
   InvoiceCustomerItem InvoiceCustomerItem[]
 }
+model Department {
+  id          String   @id @default(uuid()) @db.Uuid
+  customerId  String   @db.Uuid
+  name        String   // ชื่อหน่วยงาน
+  type        String   // ประเภทหน่วยงาน (เช่น สำนักงานใหญ่, สาขา, โรงงาน)
+  price       Float    // ราคาต่อหน่วย
+  unit        String   // หน่วย (เช่น ตัน, กิโลกรัม, เที่ยว)
+  contactInfo String?  // ข้อมูลติดต่อเฉพาะหน่วยงาน
+  address     String?  // ที่อยู่เฉพาะหน่วยงาน
+  isActive    Boolean  @default(true) // สถานะการใช้งาน
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
+  // ความสัมพันธ์กับลูกค้า
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  // ความสัมพันธ์กับการสั่งงาน
+  TruckQueue TruckQueue[]
+  InvoiceCustomerItem InvoiceCustomerItem[]
+}
 // ตารางซัพพลายเออร์ (Suppliers)
 model Supplier {
   id          String   @id @default(uuid()) @db.Uuid
@@ -118,23 +139,25 @@ model Cost {
 
 // ตารางคิวการบรรทุก (Truck_Queues)
 model TruckQueue {
-  id         String      @id @default(uuid()) @db.Uuid
-  customerId String      @db.Uuid
-  vehicleId  String?     @db.Uuid
-  driverId   String?     @db.Uuid
-  supplierId String      @db.Uuid
-  status     QueueStatus @default(pending)
-  distanceKm Float?
-  tripType   TripType    @default(full_delivery)
-  overnight  Boolean     @default(false)
-  dueDate    DateTime    @default(now())
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id           String      @id @default(uuid()) @db.Uuid
+  customerId   String      @db.Uuid
+  departmentId String?     @db.Uuid // เพิ่มฟิลด์ departmentId
+  vehicleId    String?     @db.Uuid
+  driverId     String?     @db.Uuid
+  supplierId   String      @db.Uuid
+  status       QueueStatus @default(pending)
+  distanceKm   Float?
+  tripType     TripType    @default(full_delivery)
+  overnight    Boolean     @default(false)
+  dueDate      DateTime    @default(now())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-  customer Customer @relation(fields: [customerId], references: [id])
-  vehicle  Vehicle? @relation(fields: [vehicleId], references: [id])
-  driver   Driver?  @relation(fields: [driverId], references: [id])
-  supplier Supplier @relation(fields: [supplierId], references: [id])
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  department Department? @relation(fields: [departmentId], references: [id]) // เพิ่มความสัมพันธ์
+  vehicle    Vehicle?    @relation(fields: [vehicleId], references: [id])
+  driver     Driver?     @relation(fields: [driverId], references: [id])
+  supplier   Supplier    @relation(fields: [supplierId], references: [id])
 
   DriverPayment   DriverPayment[]
   InvoiceSupplier InvoiceSupplier[]
@@ -219,14 +242,16 @@ model TrafficFine {
 
 // ตารางการวางบิล (Invoices)
 model InvoiceCustomerItem {
-  id          String   @id @default(uuid()) @db.Uuid
-  customerId  String   @db.Uuid
-  totalAmount Float
-  dueDate     DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(uuid()) @db.Uuid
+  customerId   String   @db.Uuid
+  departmentId String?  @db.Uuid // เพิ่มฟิลด์ departmentId
+  totalAmount  Float
+  dueDate      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   customer        Customer          @relation(fields: [customerId], references: [id])
+  department      Department?       @relation(fields: [departmentId], references: [id]) // เพิ่มความสัมพันธ์
   InvoiceCustomer InvoiceCustomer[]
 }
 
